@@ -1,0 +1,32 @@
+add_price_history:
+  name: Aggiungi variazione di prezzo
+  description: >-
+    Inserisce manualmente una variazione di prezzo passata nello storico di un
+    abbonamento. Utile per popolare lo storico con i prezzi precedenti
+    all'installazione dell'integrazione.
+  fields:
+    entity_id:
+      name: Abbonamento
+      description: Il sensore dell'abbonamento a cui aggiungere la variazione.
+      required: true
+      selector:
+        entity:
+          integration: subscription_tracker
+          domain: sensor
+    price:
+      name: Prezzo
+      description: Il prezzo in vigore a partire da quella data.
+      required: true
+      example: 12.99
+      selector:
+        number:
+          min: 0
+          step: 0.01
+          mode: box
+    date:
+      name: Data
+      description: La data da cui quel prezzo era in vigore.
+      required: true
+      example: "2021-03-01"
+      selector:
+        date:

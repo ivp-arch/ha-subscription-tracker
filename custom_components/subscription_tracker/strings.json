@@ -1,0 +1,61 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Aggiungi un abbonamento",
+        "data": {
+          "service": "Servizio",
+          "custom_name": "Nome personalizzato (solo se Servizio = Altro)",
+          "custom_icon": "Icona mdi: personalizzata (opzionale)",
+          "category": "Categoria (vuoto = quella predefinita del servizio)",
+          "plan": "Piano/tier (es. Premium, 4K)",
+          "cost": "Costo per ciclo",
+          "currency": "Valuta",
+          "billing_cycle": "Ciclo di fatturazione",
+          "renewal_date": "Prossimo rinnovo",
+          "subscribed_since": "Cliente dal (opzionale)",
+          "shared_count": "Persone che condividono l'account",
+          "payment_note": "Metodo di pagamento (nota, es. 'Carta ···· 4417')",
+          "expiring_soon_days": "Giorni di preavviso per 'in scadenza'",
+          "notes": "Note"
+        }
+      }
+    },
+    "error": {
+      "custom_name_required": "Inserisci un nome se selezioni 'Altro'"
+    },
+    "abort": {
+      "already_configured": "Questo abbonamento è già configurato"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Modifica abbonamento",
+        "data": {
+          "service": "Servizio",
+          "custom_name": "Nome personalizzato (solo se Servizio = Altro)",
+          "custom_icon": "Icona mdi: personalizzata (opzionale)",
+          "category": "Categoria (vuoto = quella predefinita del servizio)",
+          "plan": "Piano/tier (es. Premium, 4K)",
+          "cost": "Costo per ciclo",
+          "currency": "Valuta",
+          "billing_cycle": "Ciclo di fatturazione",
+          "renewal_date": "Prossimo rinnovo",
+          "subscribed_since": "Cliente dal (opzionale)",
+          "shared_count": "Persone che condividono l'account",
+          "payment_note": "Metodo di pagamento (nota, es. 'Carta ···· 4417')",
+          "expiring_soon_days": "Giorni di preavviso per 'in scadenza'",
+          "notes": "Note",
+          "paused": "Abbonamento in pausa"
+        }
+      }
+    }
+  },
+  "services": {
+    "add_price_history": {
+      "name": "Aggiungi variazione di prezzo",
+      "description": "Inserisce manualmente una variazione di prezzo passata nello storico."
+    }
+  }
+}

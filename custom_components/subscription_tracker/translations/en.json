@@ -1,0 +1,61 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add a subscription",
+        "data": {
+          "service": "Service",
+          "custom_name": "Custom name (only if Service = Other)",
+          "custom_icon": "Custom mdi: icon (optional)",
+          "category": "Category (empty = service default)",
+          "plan": "Plan/tier (e.g. Premium, 4K)",
+          "cost": "Cost per cycle",
+          "currency": "Currency",
+          "billing_cycle": "Billing cycle",
+          "renewal_date": "Next renewal",
+          "subscribed_since": "Subscribed since (optional)",
+          "shared_count": "People sharing the account",
+          "payment_note": "Payment method (note, e.g. 'Card ···· 4417')",
+          "expiring_soon_days": "Days of notice for 'expiring soon'",
+          "notes": "Notes"
+        }
+      }
+    },
+    "error": {
+      "custom_name_required": "Enter a name if you select 'Other'"
+    },
+    "abort": {
+      "already_configured": "This subscription is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Edit subscription",
+        "data": {
+          "service": "Service",
+          "custom_name": "Custom name (only if Service = Other)",
+          "custom_icon": "Custom mdi: icon (optional)",
+          "category": "Category (empty = service default)",
+          "plan": "Plan/tier (e.g. Premium, 4K)",
+          "cost": "Cost per cycle",
+          "currency": "Currency",
+          "billing_cycle": "Billing cycle",
+          "renewal_date": "Next renewal",
+          "subscribed_since": "Subscribed since (optional)",
+          "shared_count": "People sharing the account",
+          "payment_note": "Payment method (note, e.g. 'Card ···· 4417')",
+          "expiring_soon_days": "Days of notice for 'expiring soon'",
+          "notes": "Notes",
+          "paused": "Subscription paused"
+        }
+      }
+    }
+  },
+  "services": {
+    "add_price_history": {
+      "name": "Add price change",
+      "description": "Manually add a past price change to the history."
+    }
+  }
+}

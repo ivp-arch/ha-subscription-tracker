@@ -1,0 +1,14 @@
+{
+  "domain": "subscription_tracker",
+  "name": "Subscription Tracker",
+  "codeowners": [
+    "@ivp-arch"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/ivp-arch/ha-subscription-tracker",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/ivp-arch/ha-subscription-tracker/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
