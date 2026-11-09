@@ -15,7 +15,7 @@
           "renewal_date": "Prossimo rinnovo",
           "subscribed_since": "Cliente dal (opzionale)",
           "shared_count": "Persone che condividono l'account",
-          "payment_note": "Metodo di pagamento (nota, es. 'Carta ···· 4417')",
+          "payment_note": "Metodo di pagamento (nota, es. 'Carta personale')",
           "expiring_soon_days": "Giorni di preavviso per 'in scadenza'",
           "notes": "Note"
         }
@@ -44,10 +44,17 @@
           "renewal_date": "Prossimo rinnovo",
           "subscribed_since": "Cliente dal (opzionale)",
           "shared_count": "Persone che condividono l'account",
-          "payment_note": "Metodo di pagamento (nota, es. 'Carta ···· 4417')",
+          "payment_note": "Metodo di pagamento (nota, es. 'Carta personale')",
           "expiring_soon_days": "Giorni di preavviso per 'in scadenza'",
           "notes": "Note",
           "paused": "Abbonamento in pausa"
+        }
+      },
+      "hub": {
+        "title": "Soglia di budget",
+        "description": "Spesa mensile massima che vuoi tenere per gli abbonamenti. 0 = nessuna soglia.",
+        "data": {
+          "budget": "Budget mensile"
         }
       }
     }

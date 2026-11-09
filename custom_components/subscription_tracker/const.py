@@ -23,6 +23,21 @@ CONF_EXPIRING_SOON_DAYS = "expiring_soon_days"
 # Chiave interna (options) per lo storico prezzi: lista di {date, price}
 CONF_PRICE_HISTORY = "price_history"
 
+# Voce "hub": possiede il sensore di riepilogo e la soglia di budget.
+CONF_HUB = "hub"
+CONF_BUDGET = "budget"
+HUB_UNIQUE_ID = "hub"
+HUB_TITLE = "Riepilogo abbonamenti"
+
+# Versione del contratto attributi (vedi docs/attributes-contract.md).
+CONTRACT_VERSION = 1
+
+# Finestra della timeline dei rinnovi nel riepilogo (giorni).
+UPCOMING_DAYS = 30
+
+# Segnale interno: ricalcola il riepilogo.
+SIGNAL_SUMMARY_UPDATE = f"{DOMAIN}_summary_update"
+
 CUSTOM_SERVICE_KEY = "altro"
 
 # --- Cicli di fatturazione ------------------------------------------------

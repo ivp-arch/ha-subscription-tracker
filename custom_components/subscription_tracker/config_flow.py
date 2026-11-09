@@ -25,12 +25,14 @@ from .const import (
     BILLING_CYCLES,
     CATEGORIES,
     CONF_BILLING_CYCLE,
+    CONF_BUDGET,
     CONF_CATEGORY,
     CONF_COST,
     CONF_CURRENCY,
     CONF_CUSTOM_ICON,
     CONF_CUSTOM_NAME,
     CONF_EXPIRING_SOON_DAYS,
+    CONF_HUB,
     CONF_NOTES,
     CONF_PAUSED,
     CONF_PAYMENT_NOTE,
@@ -44,6 +46,8 @@ from .const import (
     CUSTOM_SERVICE_KEY,
     DEFAULT_EXPIRING_SOON_DAYS,
     DOMAIN,
+    HUB_TITLE,
+    HUB_UNIQUE_ID,
     KNOWN_SERVICES,
 )
 
@@ -78,7 +82,11 @@ def _build_schema(defaults: dict[str, Any] | None = None, *, is_options: bool = 
         vol.Required(
             CONF_RENEWAL_DATE, default=d.get(CONF_RENEWAL_DATE, date.today().isoformat())
         ): DateSelector(),
-        vol.Optional(CONF_SUBSCRIBED_SINCE, default=d.get(CONF_SUBSCRIBED_SINCE, "")): DateSelector(),
+        # Niente default "": DateSelector valida con cv.date e rifiuta la stringa vuota.
+        vol.Optional(
+            CONF_SUBSCRIBED_SINCE,
+            description={"suggested_value": d.get(CONF_SUBSCRIBED_SINCE) or None},
+        ): DateSelector(),
         vol.Optional(CONF_SHARED_COUNT, default=d.get(CONF_SHARED_COUNT, 1)): NumberSelector(
             NumberSelectorConfig(min=1, step=1, mode=NumberSelectorMode.BOX)
         ),
@@ -134,9 +142,17 @@ class SubscriptionTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(step_id="user", data_schema=_build_schema(), errors=errors)
 
+    async def async_step_import(self, import_data: dict[str, Any] | None = None):
+        """Crea la voce hub (riepilogo + budget), una sola."""
+        await self.async_set_unique_id(HUB_UNIQUE_ID)
+        self._abort_if_unique_id_configured()
+        return self.async_create_entry(title=HUB_TITLE, data={CONF_HUB: True})
+
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry: config_entries.ConfigEntry) -> "SubscriptionTrackerOptionsFlow":
+    def async_get_options_flow(config_entry: config_entries.ConfigEntry):
+        if config_entry.data.get(CONF_HUB):
+            return HubOptionsFlow(config_entry)
         return SubscriptionTrackerOptionsFlow(config_entry)
 
 
@@ -176,4 +192,30 @@ class SubscriptionTrackerOptionsFlow(config_entries.OptionsFlow):
         current.setdefault(CONF_PAUSED, self._config_entry.options.get(CONF_PAUSED, False))
         return self.async_show_form(
             step_id="init", data_schema=_build_schema(current, is_options=True), errors=errors
+        )
+
+
+class HubOptionsFlow(config_entries.OptionsFlow):
+    """Impostazioni globali: soglia di budget mensile."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        self._config_entry = config_entry
+
+    async def async_step_init(self, user_input: dict[str, Any] | None = None):
+        return await self.async_step_hub(user_input)
+
+    async def async_step_hub(self, user_input: dict[str, Any] | None = None):
+        if user_input is not None:
+            return self.async_create_entry(title="", data={CONF_BUDGET: float(user_input[CONF_BUDGET])})
+
+        current = float(self._config_entry.options.get(CONF_BUDGET) or 0)
+        return self.async_show_form(
+            step_id="hub",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_BUDGET, default=current): NumberSelector(
+                        NumberSelectorConfig(min=0, step=0.01, mode=NumberSelectorMode.BOX)
+                    )
+                }
+            ),
         )
