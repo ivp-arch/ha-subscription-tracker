@@ -8,11 +8,11 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.subscription_tracker.const import DOMAIN
 
-SUMMARY = "sensor.abbonamenti_totale"
+SUMMARY = "sensor.subscriptions_total"
 
 
 def _today() -> date:
-    """Data di HA (fuso configurato), non quella di sistema del runner."""
+    """HA date (configured time zone), not the runner system date."""
     return dt_util.now().date()
 
 
@@ -21,7 +21,7 @@ def _sub(service, name, cost=10.0, days=10, **extra):
         domain=DOMAIN, title=name, unique_id=f"{service}_{name}",
         data={"service": service, "cost": cost, "currency": "EUR", "billing_cycle": "monthly",
               "renewal_date": (_today() + timedelta(days=days)).isoformat(),
-              "payment_note": "Carta 4417", **extra},
+              "payment_note": "Card 4417", **extra},
         options={"price_history": [{"date": _today().isoformat(), "price": cost}]},
     )
 
@@ -70,12 +70,12 @@ async def test_summary_updates_on_remove_and_add(hass):
 
 
 async def test_legacy_summary_is_adopted_by_hub(hass):
-    """Registro dell'installazione precedente: riepilogo legato a un abbonamento."""
+    """Registry of the previous installation: summary tied to a subscription."""
     a = _sub("netflix", "Netflix")
     a.add_to_hass(hass)
     reg = er.async_get(hass)
     reg.async_get_or_create("sensor", DOMAIN, f"{DOMAIN}_summary", config_entry=a,
-                            suggested_object_id="abbonamenti_totale")
+                            suggested_object_id="subscriptions_total")
     assert await hass.config_entries.async_setup(a.entry_id)
     await hass.async_block_till_done()
     assert reg.async_get(SUMMARY).config_entry_id == _hub(hass).entry_id
@@ -99,7 +99,7 @@ async def test_budget_option_flows_into_summary(hass):
 
 
 async def test_timeline_and_renewal_advance(hass):
-    a = _sub("netflix", "Netflix", days=-3)  # data inserita 3 giorni fa
+    a = _sub("netflix", "Netflix", days=-3)  # entered date 3 days ago
     await _setup(hass, a)
     st = hass.states.get("sensor.netflix")
     assert int(st.state) >= 0 and st.attributes["status"] != "expired"
@@ -134,7 +134,7 @@ async def test_options_flow_can_set_and_clear_subscribed_since(hass):
     base = {"service": "netflix", "cost": 10.0, "currency": "EUR", "billing_cycle": "monthly",
             "renewal_date": _today().isoformat()}
     r = await hass.config_entries.options.async_init(a.entry_id)
-    r = await hass.config_entries.options.async_configure(r["flow_id"], base)  # senza data
+    r = await hass.config_entries.options.async_configure(r["flow_id"], base)  # without date
     assert r["type"] == FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
     assert "subscribed_since" not in hass.states.get("sensor.netflix").attributes

@@ -1,4 +1,4 @@
-"""Config flow per Subscription Tracker."""
+"""Config flow for Subscription Tracker."""
 from __future__ import annotations
 
 from datetime import date
@@ -57,7 +57,7 @@ def _service_options() -> list[dict[str, str]]:
 
 
 def _build_schema(defaults: dict[str, Any] | None = None, *, is_options: bool = False) -> vol.Schema:
-    """Schema del form. In options mostriamo anche il flag 'in pausa'."""
+    """Form schema. The options flow also shows the 'paused' flag."""
     d = defaults or {}
 
     schema: dict[Any, Any] = {
@@ -82,7 +82,7 @@ def _build_schema(defaults: dict[str, Any] | None = None, *, is_options: bool = 
         vol.Required(
             CONF_RENEWAL_DATE, default=d.get(CONF_RENEWAL_DATE, date.today().isoformat())
         ): DateSelector(),
-        # Niente default "": DateSelector valida con cv.date e rifiuta la stringa vuota.
+        # No "" default: DateSelector validates with cv.date and rejects the empty string.
         vol.Optional(
             CONF_SUBSCRIBED_SINCE,
             description={"suggested_value": d.get(CONF_SUBSCRIBED_SINCE) or None},
@@ -117,7 +117,7 @@ def _title(user_input: dict[str, Any]) -> str:
 
 
 class SubscriptionTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Aggiunta di un nuovo abbonamento."""
+    """Add a new subscription."""
 
     VERSION = 1
 
@@ -132,7 +132,7 @@ class SubscriptionTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 await self.async_set_unique_id(f"{user_input[CONF_SERVICE]}_{title}")
                 self._abort_if_unique_id_configured()
 
-                # Il prezzo iniziale apre lo storico, datato al giorno di creazione.
+                # The initial price opens the history, dated to the creation day.
                 options = {
                     CONF_PRICE_HISTORY: [
                         {"date": date.today().isoformat(), "price": float(user_input[CONF_COST])}
@@ -143,7 +143,7 @@ class SubscriptionTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(step_id="user", data_schema=_build_schema(), errors=errors)
 
     async def async_step_import(self, import_data: dict[str, Any] | None = None):
-        """Crea la voce hub (riepilogo + budget), una sola."""
+        """Create the hub entry (summary + budget), only one."""
         await self.async_set_unique_id(HUB_UNIQUE_ID)
         self._abort_if_unique_id_configured()
         return self.async_create_entry(title=HUB_TITLE, data={CONF_HUB: True})
@@ -157,7 +157,7 @@ class SubscriptionTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 
 class SubscriptionTrackerOptionsFlow(config_entries.OptionsFlow):
-    """Modifica di un abbonamento gia' configurato."""
+    """Edit an already configured subscription."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         self._config_entry = config_entry
@@ -173,7 +173,7 @@ class SubscriptionTrackerOptionsFlow(config_entries.OptionsFlow):
                 old_cost = float(self._config_entry.data.get(CONF_COST, 0))
                 new_cost = float(user_input[CONF_COST])
 
-                # Cattura automatica: se il costo cambia, registra la variazione con la data odierna.
+                # Automatic capture: if the cost changes, record the change with today's date.
                 if abs(new_cost - old_cost) > 0.001:
                     today = date.today().isoformat()
                     history = [h for h in history if h.get("date") != today]
@@ -196,7 +196,7 @@ class SubscriptionTrackerOptionsFlow(config_entries.OptionsFlow):
 
 
 class HubOptionsFlow(config_entries.OptionsFlow):
-    """Impostazioni globali: soglia di budget mensile."""
+    """Global settings: monthly budget threshold."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
         self._config_entry = config_entry

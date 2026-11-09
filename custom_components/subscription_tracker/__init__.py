@@ -1,4 +1,4 @@
-"""Integrazione Subscription Tracker: monitora abbonamenti streaming."""
+"""Subscription Tracker integration: tracks streaming subscriptions."""
 from __future__ import annotations
 
 from datetime import date
@@ -36,11 +36,11 @@ ADD_PRICE_HISTORY_SCHEMA = vol.Schema(
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Registra il servizio e garantisce l'esistenza della voce hub."""
+    """Register the service and make sure the hub entry exists."""
     _async_register_services(hass)
 
-    # La voce hub possiede il riepilogo e il budget: la creiamo da soli la
-    # prima volta (anche per chi aggiorna da una versione senza hub).
+    # The hub entry owns the summary and the budget: it is created automatically
+    # the first time (also for users upgrading from a version without a hub).
     if not any(e.data.get(CONF_HUB) for e in hass.config_entries.async_entries(DOMAIN)):
         hass.async_create_task(
             hass.config_entries.flow.async_init(
@@ -61,18 +61,18 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Dopo la rimozione di un abbonamento il riepilogo va ricalcolato."""
+    """After a subscription is removed the summary must be recomputed."""
     async_dispatcher_send(hass, SIGNAL_SUMMARY_UPDATE)
 
 
 async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
-    """Ricarica l'entry quando la configurazione viene modificata."""
+    """Reload the entry when its configuration is modified."""
     await hass.config_entries.async_reload(entry.entry_id)
 
 
 def _async_register_services(hass: HomeAssistant) -> None:
     async def _handle_add_price_history(call: ServiceCall) -> None:
-        """Inserisce a mano una variazione di prezzo passata."""
+        """Manually add a past price change."""
         entity_id = call.data["entity_id"]
         price = float(call.data[ATTR_PRICE])
         when: date = call.data[ATTR_DATE]
@@ -84,7 +84,7 @@ def _async_register_services(hass: HomeAssistant) -> None:
 
         entry = hass.config_entries.async_get_entry(rentry.config_entry_id)
         if entry is None or entry.domain != DOMAIN or entry.data.get(CONF_HUB):
-            raise ServiceValidationError(f"{entity_id} non e' un abbonamento di {DOMAIN}")
+            raise ServiceValidationError(f"{entity_id} is not a {DOMAIN} subscription")
 
         iso = when.isoformat()
         history = [h for h in entry.options.get(CONF_PRICE_HISTORY, []) if h.get("date") != iso]

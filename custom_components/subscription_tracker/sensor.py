@@ -1,4 +1,4 @@
-"""Piattaforma sensore per Subscription Tracker."""
+"""Sensor platform for Subscription Tracker."""
 from __future__ import annotations
 
 from datetime import date, datetime, timedelta
@@ -48,7 +48,7 @@ SUMMARY_UNIQUE_ID = f"{DOMAIN}_summary"
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    """Hub: sensore di riepilogo. Altre voci: sensore del singolo abbonamento."""
+    """Hub: summary sensor. Other entries: single-subscription sensor."""
     if entry.data.get(CONF_HUB):
         _async_adopt_legacy_summary(hass, entry)
         async_add_entities([SubscriptionSummarySensor(hass, entry)], update_before_add=True)
@@ -59,10 +59,10 @@ async def async_setup_entry(
 
 @callback
 def _async_adopt_legacy_summary(hass: HomeAssistant, hub: ConfigEntry) -> None:
-    """Sposta sull'hub il riepilogo creato dalle versioni senza hub.
+    """Move to the hub the summary created by versions without a hub.
 
-    In precedenza il riepilogo era legato al primo abbonamento caricato: se
-    quella voce veniva ricaricata o rimossa, il riepilogo spariva.
+    Previously the summary was tied to the first loaded subscription: if that
+    entry was reloaded or removed, the summary disappeared.
     """
     registry = er.async_get(hass)
     entity_id = registry.async_get_entity_id("sensor", DOMAIN, SUMMARY_UNIQUE_ID)
@@ -75,7 +75,7 @@ def _async_adopt_legacy_summary(hass: HomeAssistant, hub: ConfigEntry) -> None:
 
 @callback
 def _schedule_midnight(hass: HomeAssistant, action) -> Any:
-    """Esegue `action` alla prossima mezzanotte locale; restituisce l'unsub."""
+    """Run `action` at the next local midnight; returns the unsubscribe callback."""
     target = dt_util.start_of_local_day(dt_util.now() + timedelta(days=1))
 
     @callback
@@ -86,7 +86,7 @@ def _schedule_midnight(hass: HomeAssistant, action) -> Any:
 
 
 class SubscriptionSensor(SensorEntity):
-    """Un singolo abbonamento. Stato = giorni rimanenti al rinnovo."""
+    """A single subscription. State = days left until renewal."""
 
     _attr_has_entity_name = True
     _attr_native_unit_of_measurement = "days"
@@ -132,7 +132,7 @@ class SubscriptionSensor(SensorEntity):
         return parse_date(self._data.get(CONF_RENEWAL_DATE))
 
     def _renewal(self) -> date | None:
-        """Prossimo rinnovo effettivo: la data inserita avanza da sola per ciclo."""
+        """Effective next renewal: the entered date advances by itself, one cycle at a time."""
         return next_renewal(
             self._anchor(), self._data.get(CONF_BILLING_CYCLE), dt_util.now().date()
         )
@@ -188,8 +188,8 @@ class SubscriptionSensor(SensorEntity):
             "price_history": history,
         }
 
-        # Metodo di pagamento volutamente NON esposto come attributo:
-        # resta solo nella configurazione, per non finire nel recorder.
+        # Payment method deliberately NOT exposed as an attribute:
+        # it stays in the configuration only, so it does not end up in the recorder.
 
         if since:
             attrs["subscribed_since"] = since.isoformat()
@@ -222,9 +222,9 @@ class SubscriptionSensor(SensorEntity):
 
 
 class SubscriptionSummarySensor(SensorEntity):
-    """Riepilogo di tutti gli abbonamenti. Stato = costo mensile totale."""
+    """Summary of all subscriptions. State = total monthly cost."""
 
-    _attr_name = "Abbonamenti totale"
+    _attr_name = "Subscriptions total"
     _attr_unique_id = SUMMARY_UNIQUE_ID
     _attr_icon = "mdi:cash-multiple"
     _attr_state_class = SensorStateClass.MEASUREMENT

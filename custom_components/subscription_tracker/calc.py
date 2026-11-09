@@ -1,7 +1,7 @@
-"""Calcoli puri di Subscription Tracker.
+"""Pure calculations for Subscription Tracker.
 
-Nessuna dipendenza da Home Assistant: input e output sono tipi base, cosi'
-la logica (rinnovi, totali, budget, timeline) si prova senza istanza HA.
+No dependency on Home Assistant: inputs and outputs are basic types, so the
+logic (renewals, totals, budget, timeline) can be tested without an HA instance.
 """
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ def monthly_cost(cost: float, cycle: str | None) -> float:
 
 
 def add_months(d: date, months: int) -> date:
-    """Somma mesi mantenendo il giorno; se non esiste usa l'ultimo del mese."""
+    """Add months keeping the day; if it does not exist use the last day of the month."""
     year_offset, month_index = divmod(d.month - 1 + months, 12)
     year = d.year + year_offset
     month = month_index + 1
@@ -43,10 +43,10 @@ def add_months(d: date, months: int) -> date:
 
 
 def next_renewal(anchor: date | None, cycle: str | None, today: date) -> date | None:
-    """Prossimo rinnovo >= oggi, avanzando dalla data ancora per cicli interi.
+    """Next renewal >= today, advancing from the anchor date by whole cycles.
 
-    Si parte sempre dall'ancora (non dal rinnovo precedente), cosi' un
-    abbonamento del 31 gennaio torna al 31 marzo dopo il 28 febbraio.
+    It always starts from the anchor (not from the previous renewal), so a
+    subscription renewing on January 31 goes back to March 31 after February 28.
     """
     if anchor is None:
         return None
@@ -78,16 +78,16 @@ def build_summary(
     budget: float | None,
     upcoming_days: int,
 ) -> dict[str, Any]:
-    """Riepilogo di tutti gli abbonamenti.
+    """Summary of all subscriptions.
 
-    Ogni elemento di `subs`: name, service, category, cost, currency, cycle,
+    Each item of `subs`: name, service, category, cost, currency, cycle,
     anchor (date|None), paused (bool), threshold (int).
-    Restituisce {"monthly": float, "attributes": dict}.
+    Returns {"monthly": float, "attributes": dict}.
     """
     active = [s for s in subs if not s["paused"]]
     paused_count = len(subs) - len(active)
 
-    # Nessuna conversione di cambio: si somma solo la valuta prevalente.
+    # No exchange-rate conversion: only the prevailing currency is summed.
     counts = Counter(s["currency"] for s in active)
     currency = counts.most_common(1)[0][0] if counts else "EUR"
     counted = [s for s in active if s["currency"] == currency]

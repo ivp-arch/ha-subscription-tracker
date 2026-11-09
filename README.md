@@ -1,6 +1,6 @@
 # Subscription Tracker for Home Assistant
 
-Custom integration to track streaming subscriptions: Netflix, Prime Video, Disney+, Paramount+, Crunchyroll, HBO Max, NOW TV, Chili, Apple TV+, DAZN, RaiPlay+, Mediaset Infinity+, TIMvision, Sky, Discovery+, Spotify, Apple Music, Amazon Music, YouTube Music, Tidal, Audible — plus any custom service ("Altro").
+Custom integration to track streaming subscriptions: Netflix, Prime Video, Disney+, Paramount+, Crunchyroll, HBO Max, NOW TV, Chili, Apple TV+, DAZN, RaiPlay+, Mediaset Infinity+, TIMvision, Sky, Discovery+, Spotify, Apple Music, Amazon Music, YouTube Music, Tidal, Audible — plus any custom service ("Other").
 
 The user interface of the integration is currently in Italian and English.
 
@@ -25,11 +25,11 @@ Each subscription creates a sensor with **state = days until renewal** and these
 
 The payment method is **never** exposed as an attribute: it only stays in the configuration, so it does not end up in the recorder database. Note that the configuration is part of Home Assistant backups, so write a generic note (e.g. "Personal card"), not card digits. Free notes are also visible in the attributes: no personal data.
 
-### Summary sensor and the "Riepilogo abbonamenti" entry
+### Summary sensor and the "Subscription summary" entry
 
-`sensor.abbonamenti_totale` — state = total monthly cost. It belongs to a dedicated entry, "Riepilogo abbonamenti" (subscription summary), created automatically, so it does not depend on any single subscription. Main attributes: `yearly_cost`, `active_count`, `paused_count`, `by_category`, `expiring` (renewals within the notice period), `upcoming` (timeline of renewals in the next 30 days) and `upcoming_total`, `budget`, `budget_used_pct`, `budget_remaining`, `budget_exceeded`. The full list, with types and versioning rules, is in [`docs/attributes-contract.md`](docs/attributes-contract.md).
+`sensor.subscriptions_total` — state = total monthly cost. It belongs to a dedicated entry, "Subscription summary", created automatically, so it does not depend on any single subscription. Main attributes: `yearly_cost`, `active_count`, `paused_count`, `by_category`, `expiring` (renewals within the notice period), `upcoming` (timeline of renewals in the next 30 days) and `upcoming_total`, `budget`, `budget_used_pct`, `budget_remaining`, `budget_exceeded`. The full list, with types and versioning rules, is in [`docs/attributes-contract.md`](docs/attributes-contract.md).
 
-**Monthly budget.** Set it from Devices & services → Subscription Tracker → "Riepilogo abbonamenti" → Configure. A value of 0 disables the threshold.
+**Monthly budget.** Set it from Devices & services → Subscription Tracker → "Subscription summary" → Configure. A value of 0 disables the threshold.
 
 **Mixed currencies.** There is no exchange-rate conversion: totals only sum the subscriptions in the prevailing currency; `mixed_currency` and `other_currency_count` report the excluded ones.
 
@@ -78,22 +78,22 @@ trigger:
     at: "09:00:00"
 condition:
   - condition: template
-    value_template: "{{ state_attr('sensor.abbonamenti_totale','expiring_count') | int > 0 }}"
+    value_template: "{{ state_attr('sensor.subscriptions_total','expiring_count') | int > 0 }}"
 action:
   - service: notify.mobile_app
     data:
       title: Upcoming renewals
       message: >-
-        {% for s in state_attr('sensor.abbonamenti_totale','expiring') %}
+        {% for s in state_attr('sensor.subscriptions_total','expiring') %}
         {{ s.name }}: {{ s.cost }} € in {{ s.days }} days.
         {% endfor %}
 ```
 
 ```yaml
-# Budget threshold exceeded (the budget is set in the "Riepilogo abbonamenti" entry)
+# Budget threshold exceeded (the budget is set in the "Subscription summary" entry)
 trigger:
   - platform: state
-    entity_id: sensor.abbonamenti_totale
+    entity_id: sensor.subscriptions_total
     attribute: budget_exceeded
     to: true
 action:

@@ -13,9 +13,9 @@ State: days until the next renewal (integer, never negative if the date is valid
 | Attribute | Type | Notes |
 |---|---|---|
 | `contract_version` | int | Always `1` |
-| `service` | str | Service key (`netflix`, `altro`, ...) |
+| `service` | str | Service key (`netflix`, `other`, ...) |
 | `display_name` | str | Displayable name |
-| `category` | str | `video`, `audio`, `altro` |
+| `category` | str | `video`, `audio`, `other` |
 | `color` | str \| null | Hex; `null` for custom services |
 | `plan` | str \| null | Plan/tier |
 | `cost` | float | Cost per cycle |
@@ -35,9 +35,9 @@ State: days until the next renewal (integer, never negative if the date is valid
 
 **Automatic renewal.** The date entered by the user is an anchor: `next_renewal` is the first date equal to or after today obtained by adding whole cycles to the anchor (it always starts from the anchor, so a monthly renewal on January 31 falls on February 28 and goes back to March 31). Nothing is written to the configuration. To stop the count use "paused".
 
-## Summary sensor (`sensor.abbonamenti_totale`)
+## Summary sensor (`sensor.subscriptions_total`)
 
-Owned by the "Riepilogo abbonamenti" entry (hub), created automatically. State: total monthly cost of the non-paused subscriptions, in the prevailing currency.
+Owned by the "Subscription summary" entry (hub), created automatically. State: total monthly cost of the non-paused subscriptions, in the prevailing currency.
 
 | Attribute | Type | Notes |
 |---|---|---|
@@ -60,7 +60,7 @@ Owned by the "Riepilogo abbonamenti" entry (hub), created automatically. State: 
 
 Item of `expiring` and `upcoming`: `{name, service, days, cost, renewal}`, with `days` ≥ 0, `renewal` ISO, `cost` per cycle.
 
-The budget is set from Settings → Devices & services → Subscription Tracker → "Riepilogo abbonamenti" → Configure.
+The budget is set from Settings → Devices & services → Subscription Tracker → "Subscription summary" → Configure.
 
 ## Not included in version 1
 

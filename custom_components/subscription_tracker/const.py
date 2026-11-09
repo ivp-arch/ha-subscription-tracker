@@ -1,9 +1,9 @@
-"""Costanti per l'integrazione Subscription Tracker."""
+"""Constants for the Subscription Tracker integration."""
 from __future__ import annotations
 
 DOMAIN = "subscription_tracker"
 
-# --- Campi di configurazione ---------------------------------------------
+# --- Configuration fields ------------------------------------------------
 CONF_SERVICE = "service"
 CONF_CUSTOM_NAME = "custom_name"
 CONF_CUSTOM_ICON = "custom_icon"
@@ -20,27 +20,27 @@ CONF_PAUSED = "paused"
 CONF_NOTES = "notes"
 CONF_EXPIRING_SOON_DAYS = "expiring_soon_days"
 
-# Chiave interna (options) per lo storico prezzi: lista di {date, price}
+# Internal key (options) for the price history: list of {date, price}
 CONF_PRICE_HISTORY = "price_history"
 
-# Voce "hub": possiede il sensore di riepilogo e la soglia di budget.
+# "Hub" entry: owns the summary sensor and the budget threshold.
 CONF_HUB = "hub"
 CONF_BUDGET = "budget"
 HUB_UNIQUE_ID = "hub"
-HUB_TITLE = "Riepilogo abbonamenti"
+HUB_TITLE = "Subscription summary"
 
-# Versione del contratto attributi (vedi docs/attributes-contract.md).
+# Attribute contract version (see docs/attributes-contract.md).
 CONTRACT_VERSION = 1
 
-# Finestra della timeline dei rinnovi nel riepilogo (giorni).
+# Renewal timeline window in the summary (days).
 UPCOMING_DAYS = 30
 
-# Segnale interno: ricalcola il riepilogo.
+# Internal signal: recompute the summary.
 SIGNAL_SUMMARY_UPDATE = f"{DOMAIN}_summary_update"
 
-CUSTOM_SERVICE_KEY = "altro"
+CUSTOM_SERVICE_KEY = "other"
 
-# --- Cicli di fatturazione ------------------------------------------------
+# --- Billing cycles -------------------------------------------------------
 BILLING_CYCLE_MONTHLY = "monthly"
 BILLING_CYCLE_QUARTERLY = "quarterly"
 BILLING_CYCLE_YEARLY = "yearly"
@@ -51,7 +51,7 @@ BILLING_CYCLES = [
     BILLING_CYCLE_YEARLY,
 ]
 
-# Mesi per ciclo, usati per normalizzare il costo mensile
+# Months per cycle, used to normalize the monthly cost
 BILLING_CYCLE_MONTHS = {
     BILLING_CYCLE_MONTHLY: 1,
     BILLING_CYCLE_QUARTERLY: 3,
@@ -62,26 +62,26 @@ CURRENCIES = ["EUR", "USD", "GBP"]
 
 DEFAULT_EXPIRING_SOON_DAYS = 7
 
-# --- Stati ----------------------------------------------------------------
+# --- Statuses -------------------------------------------------------------
 STATUS_ACTIVE = "active"
 STATUS_EXPIRING_SOON = "expiring_soon"
 STATUS_EXPIRED = "expired"
 STATUS_PAUSED = "paused"
 
-# --- Categorie ------------------------------------------------------------
+# --- Categories -----------------------------------------------------------
 CATEGORY_VIDEO = "video"
 CATEGORY_AUDIO = "audio"
-CATEGORY_ALTRO = "altro"
+CATEGORY_OTHER = "other"
 
-CATEGORIES = [CATEGORY_VIDEO, CATEGORY_AUDIO, CATEGORY_ALTRO]
+CATEGORIES = [CATEGORY_VIDEO, CATEGORY_AUDIO, CATEGORY_OTHER]
 
-# --- Servizio custom ------------------------------------------------------
+# --- Custom service -------------------------------------------------------
 SERVICE_ADD_PRICE_HISTORY = "add_price_history"
 ATTR_PRICE = "price"
 ATTR_DATE = "date"
 
-# --- Servizi noti pre-mappati --------------------------------------------
-# nome visualizzato, icona mdi, colore identificativo, categoria di default.
+# --- Known pre-mapped services --------------------------------------------
+# display name, mdi icon, identifying color, default category.
 KNOWN_SERVICES: dict[str, dict[str, str]] = {
     "netflix": {"name": "Netflix", "icon": "mdi:netflix", "color": "#A32D2D", "category": CATEGORY_VIDEO},
     "prime_video": {"name": "Prime Video", "icon": "mdi:amazon", "color": "#185FA5", "category": CATEGORY_VIDEO},
@@ -104,5 +104,5 @@ KNOWN_SERVICES: dict[str, dict[str, str]] = {
     "youtube_music": {"name": "YouTube Music/Premium", "icon": "mdi:youtube", "color": "#A32D2D", "category": CATEGORY_AUDIO},
     "tidal": {"name": "Tidal", "icon": "mdi:water-outline", "color": "#2C2C2A", "category": CATEGORY_AUDIO},
     "audible": {"name": "Audible", "icon": "mdi:book-music-outline", "color": "#854F0B", "category": CATEGORY_AUDIO},
-    CUSTOM_SERVICE_KEY: {"name": "Altro (personalizzato)", "icon": "mdi:credit-card-outline", "color": "#5F5E5A", "category": CATEGORY_ALTRO},
+    CUSTOM_SERVICE_KEY: {"name": "Altro (personalizzato)", "icon": "mdi:credit-card-outline", "color": "#5F5E5A", "category": CATEGORY_OTHER},
 }

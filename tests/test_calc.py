@@ -48,10 +48,10 @@ def test_status():
 
 def test_summary_totals_budget_timeline():
     subs = [
-        sub("Netflix", 19.99, anchor=date(2026, 11, 9)),            # oggi
+        sub("Netflix", 19.99, anchor=date(2026, 11, 9)),            # today
         sub("Disney", 120.0, cycle="yearly", anchor=date(2027, 2, 1), cat="video"),
-        sub("Spotify", 17.99, anchor=date(2026, 10, 25), cat="audio"),  # avanza al 25/11
-        sub("Pausa", 50.0, paused=True),
+        sub("Spotify", 17.99, anchor=date(2026, 10, 25), cat="audio"),  # advances to 25/11
+        sub("Paused", 50.0, paused=True),
     ]
     r = build_summary(subs, T, 100.0, 30)
     a = r["attributes"]
