@@ -17,6 +17,7 @@ State: days until the next renewal (integer, never negative if the date is valid
 | `display_name` | str | Displayable name |
 | `category` | str | `video`, `audio`, `other` |
 | `color` | str \| null | Hex; `null` for custom services |
+| `custom_icon` | str \| null | `mdi:` icon chosen by the user for this subscription; `null` if not set. Cards use their own generic icons unless this is set |
 | `plan` | str \| null | Plan/tier |
 | `cost` | float | Cost per cycle |
 | `currency` | str | `EUR`, `USD`, `GBP` |
@@ -58,7 +59,7 @@ Owned by the "Subscription summary" entry (hub), created automatically. State: t
 | `budget_remaining` | float \| null | `budget - spend`; negative if exceeded |
 | `budget_exceeded` | bool | `true` if the monthly spend exceeds the budget |
 
-Item of `expiring` and `upcoming`: `{name, service, days, cost, renewal}`, with `days` ≥ 0, `renewal` ISO, `cost` per cycle.
+Item of `expiring` and `upcoming`: `{name, display_name, service, days, cost, renewal}`, with `days` ≥ 0, `renewal` ISO, `cost` per cycle. `name` is the entry title (service and plan, e.g. "Netflix (Premium)"); `display_name` is the service name, the same as the single-subscription sensor attribute ("Netflix"). Cards should show `display_name`.
 
 The budget is set from Settings → Devices & services → Subscription Tracker → "Subscription summary" → Configure.
 

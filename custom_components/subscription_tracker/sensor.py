@@ -172,6 +172,7 @@ class SubscriptionSensor(SensorEntity):
             "display_name": self._display_name,
             "category": self._category,
             "color": self._known.get("color"),
+            "custom_icon": self._data.get(CONF_CUSTOM_ICON) or None,
             "plan": self._data.get(CONF_PLAN) or None,
             "cost": cost,
             "currency": self._data.get(CONF_CURRENCY, "EUR"),
@@ -281,6 +282,11 @@ class SubscriptionSummarySensor(SensorEntity):
             subs.append(
                 {
                     "name": entry.title,
+                    "display_name": (
+                        data.get(CONF_CUSTOM_NAME)
+                        if data[CONF_SERVICE] == CUSTOM_SERVICE_KEY
+                        else known["name"]
+                    ),
                     "service": data[CONF_SERVICE],
                     "category": data.get(CONF_CATEGORY) or known["category"],
                     "cost": float(data.get(CONF_COST, 0)),

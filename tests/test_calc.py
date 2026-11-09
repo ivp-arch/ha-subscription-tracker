@@ -66,6 +66,15 @@ def test_summary_totals_budget_timeline():
     assert a["budget_remaining"] == 52.02 and not a["budget_exceeded"]
 
 
+def test_items_carry_display_name():
+    s = sub("Netflix (Premium)", 19.99, anchor=date(2026, 11, 9))
+    s["display_name"] = "Netflix"
+    a = build_summary([s], T, None, 30)["attributes"]
+    assert a["upcoming"][0]["name"] == "Netflix (Premium)"
+    assert a["upcoming"][0]["display_name"] == "Netflix"
+    assert a["expiring"][0]["display_name"] == "Netflix"
+
+
 def test_summary_budget_exceeded_and_none():
     subs = [sub(cost=60.0), sub("B", 50.0)]
     a = build_summary(subs, T, 100.0, 30)["attributes"]

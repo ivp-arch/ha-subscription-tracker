@@ -22,6 +22,7 @@ Each subscription creates a sensor with **state = days until renewal** and these
 | `price_change_total` / `price_change_pct` / `price_changes_count` | Change compared to the first known price |
 | `next_renewal` | Effective next renewal (advances by itself, one cycle at a time) |
 | `color`, `category`, `display_name` | For rendering in the card |
+| `custom_icon` | Icon chosen by the user in the options, or `null`; the card shows it instead of its generic icon |
 
 The payment method is **never** exposed as an attribute: it only stays in the configuration, so it does not end up in the recorder database. Note that the configuration is part of Home Assistant backups, so write a generic note (e.g. "Personal card"), not card digits. Free notes are also visible in the attributes: no personal data.
 

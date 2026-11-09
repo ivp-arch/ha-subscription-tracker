@@ -108,6 +108,14 @@ async def test_timeline_and_renewal_advance(hass):
     assert len(up) == 1 and up[0]["name"] == "Netflix"
 
 
+async def test_custom_icon_attribute(hass):
+    a = _sub("netflix", "Netflix", custom_icon="mdi:netflix")
+    b = _sub("spotify", "Spotify")
+    await _setup(hass, a, b)
+    assert hass.states.get("sensor.netflix").attributes["custom_icon"] == "mdi:netflix"
+    assert hass.states.get("sensor.spotify").attributes["custom_icon"] is None
+
+
 async def test_payment_method_never_in_attributes(hass):
     a = _sub("netflix", "Netflix")
     await _setup(hass, a)
@@ -156,3 +164,10 @@ async def test_service_rejects_hub_entity(hass):
     with pytest.raises(ServiceValidationError):
         await hass.services.async_call(DOMAIN, "add_price_history",
             {"entity_id": SUMMARY, "price": 1, "date": "2021-03-01"}, blocking=True)
+
+
+async def test_timeline_uses_service_display_name(hass):
+    a = _sub("netflix", "Netflix (Premium)", days=5)
+    await _setup(hass, a)
+    up = hass.states.get(SUMMARY).attributes["upcoming"][0]
+    assert up["name"] == "Netflix (Premium)" and up["display_name"] == "Netflix"

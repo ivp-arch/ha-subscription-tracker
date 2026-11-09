@@ -109,6 +109,7 @@ def build_summary(
         days = (renewal - today).days
         item = {
             "name": s["name"],
+            "display_name": s.get("display_name", s["name"]),
             "service": s["service"],
             "days": days,
             "cost": s["cost"],
