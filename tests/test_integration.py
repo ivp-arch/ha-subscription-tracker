@@ -3,6 +3,7 @@ from datetime import date, timedelta
 import pytest
 from homeassistant.data_entry_flow import FlowResultType
 from homeassistant.helpers import entity_registry as er
+from homeassistant.util import dt as dt_util
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.subscription_tracker.const import DOMAIN
@@ -10,13 +11,18 @@ from custom_components.subscription_tracker.const import DOMAIN
 SUMMARY = "sensor.abbonamenti_totale"
 
 
+def _today() -> date:
+    """Data di HA (fuso configurato), non quella di sistema del runner."""
+    return dt_util.now().date()
+
+
 def _sub(service, name, cost=10.0, days=10, **extra):
     return MockConfigEntry(
         domain=DOMAIN, title=name, unique_id=f"{service}_{name}",
         data={"service": service, "cost": cost, "currency": "EUR", "billing_cycle": "monthly",
-              "renewal_date": (date.today() + timedelta(days=days)).isoformat(),
+              "renewal_date": (_today() + timedelta(days=days)).isoformat(),
               "payment_note": "Carta 4417", **extra},
-        options={"price_history": [{"date": date.today().isoformat(), "price": cost}]},
+        options={"price_history": [{"date": _today().isoformat(), "price": cost}]},
     )
 
 
@@ -115,7 +121,7 @@ async def test_config_flow_without_subscribed_since(hass):
     r = await hass.config_entries.flow.async_configure(
         r["flow_id"],
         {"service": "netflix", "cost": 12.99, "currency": "EUR", "billing_cycle": "monthly",
-         "renewal_date": date.today().isoformat()},
+         "renewal_date": _today().isoformat()},
     )
     assert r["type"] == FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
@@ -126,7 +132,7 @@ async def test_options_flow_can_set_and_clear_subscribed_since(hass):
     a = _sub("netflix", "Netflix", subscribed_since="2021-03-01")
     await _setup(hass, a)
     base = {"service": "netflix", "cost": 10.0, "currency": "EUR", "billing_cycle": "monthly",
-            "renewal_date": date.today().isoformat()}
+            "renewal_date": _today().isoformat()}
     r = await hass.config_entries.options.async_init(a.entry_id)
     r = await hass.config_entries.options.async_configure(r["flow_id"], base)  # senza data
     assert r["type"] == FlowResultType.CREATE_ENTRY
