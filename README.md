@@ -1,44 +1,46 @@
-# Subscription Tracker per Home Assistant
+# Subscription Tracker for Home Assistant
 
-Integrazione custom per monitorare abbonamenti in streaming: Netflix, Prime Video, Disney+, Paramount+, Crunchyroll, HBO Max, NOW TV, Chili, Apple TV+, DAZN, RaiPlay+, Mediaset Infinity+, TIMvision, Sky, Discovery+, Spotify, Apple Music, Amazon Music, YouTube Music, Tidal, Audible — più qualsiasi servizio personalizzato ("Altro").
+Custom integration to track streaming subscriptions: Netflix, Prime Video, Disney+, Paramount+, Crunchyroll, HBO Max, NOW TV, Chili, Apple TV+, DAZN, RaiPlay+, Mediaset Infinity+, TIMvision, Sky, Discovery+, Spotify, Apple Music, Amazon Music, YouTube Music, Tidal, Audible — plus any custom service ("Altro").
 
-## Dati inseriti dall'utente
+The user interface of the integration is currently in Italian and English.
 
-Nome servizio (con icona e colore pre-mappati), piano/tier, costo per ciclo, ciclo di fatturazione, data prossimo rinnovo, data primo abbonamento, numero di persone che condividono l'account, categoria, metodo di pagamento (nota testuale), note libere, flag "in pausa".
+## Data entered by the user
 
-## Dati derivati automaticamente
+Service name (with pre-mapped icon and color), plan/tier, cost per cycle, billing cycle, next renewal date, first subscription date, number of people sharing the account, category, payment method (text note), free notes, "paused" flag.
 
-Ogni abbonamento crea un sensore con **stato = giorni al rinnovo** e questi attributi:
+## Automatically derived data
 
-| Attributo | Descrizione |
+Each subscription creates a sensor with **state = days until renewal** and these attributes:
+
+| Attribute | Description |
 |---|---|
-| `monthly_cost` / `yearly_cost` | Costo normalizzato, così i piani annuali sono confrontabili con i mensili |
-| `cost_per_person` | Costo diviso per il numero di condivisioni |
+| `monthly_cost` / `yearly_cost` | Normalized cost, so yearly plans are comparable with monthly ones |
+| `cost_per_person` | Cost divided by the number of people sharing |
 | `status` | `active` / `expiring_soon` / `paused` |
-| `subscribed_days` | Da quanti giorni sei cliente |
-| `price_history` | Lista di `{date, price}` |
-| `price_change_total` / `price_change_pct` / `price_changes_count` | Variazione rispetto al primo prezzo noto |
-| `next_renewal` | Prossimo rinnovo effettivo (avanza da solo per ciclo) |
-| `color`, `category`, `display_name` | Per il rendering della card |
+| `subscribed_days` | For how many days you have been a customer |
+| `price_history` | List of `{date, price}` |
+| `price_change_total` / `price_change_pct` / `price_changes_count` | Change compared to the first known price |
+| `next_renewal` | Effective next renewal (advances by itself, one cycle at a time) |
+| `color`, `category`, `display_name` | For rendering in the card |
 
-Il metodo di pagamento **non** viene mai esposto come attributo: resta solo nella configurazione, per non finire nel database del recorder. Attenzione: la configurazione fa parte dei backup di Home Assistant, quindi scrivi una nota generica (es. "Carta personale"), non le cifre della carta. Anche le note libere sono visibili negli attributi: niente dati personali.
+The payment method is **never** exposed as an attribute: it only stays in the configuration, so it does not end up in the recorder database. Note that the configuration is part of Home Assistant backups, so write a generic note (e.g. "Personal card"), not card digits. Free notes are also visible in the attributes: no personal data.
 
-### Sensore di riepilogo e voce "Riepilogo abbonamenti"
+### Summary sensor and the "Riepilogo abbonamenti" entry
 
-`sensor.abbonamenti_totale` — stato = costo mensile totale. Appartiene a una voce dedicata, "Riepilogo abbonamenti", creata automaticamente: così non dipende da nessun abbonamento in particolare. Attributi principali: `yearly_cost`, `active_count`, `paused_count`, `by_category`, `expiring` (rinnovi entro il preavviso), `upcoming` (timeline dei rinnovi nei prossimi 30 giorni) e `upcoming_total`, `budget`, `budget_used_pct`, `budget_remaining`, `budget_exceeded`. L'elenco completo, con tipi e regole di versione, è in [`docs/attributes-contract.md`](docs/attributes-contract.md).
+`sensor.abbonamenti_totale` — state = total monthly cost. It belongs to a dedicated entry, "Riepilogo abbonamenti" (subscription summary), created automatically, so it does not depend on any single subscription. Main attributes: `yearly_cost`, `active_count`, `paused_count`, `by_category`, `expiring` (renewals within the notice period), `upcoming` (timeline of renewals in the next 30 days) and `upcoming_total`, `budget`, `budget_used_pct`, `budget_remaining`, `budget_exceeded`. The full list, with types and versioning rules, is in [`docs/attributes-contract.md`](docs/attributes-contract.md).
 
-**Budget mensile.** Si imposta da Dispositivi e servizi → Subscription Tracker → "Riepilogo abbonamenti" → Configura. Con 0 la soglia è disattivata.
+**Monthly budget.** Set it from Devices & services → Subscription Tracker → "Riepilogo abbonamenti" → Configure. A value of 0 disables the threshold.
 
-**Valute diverse.** Non c'è conversione di cambio: i totali sommano solo gli abbonamenti nella valuta prevalente; `mixed_currency` e `other_currency_count` segnalano gli esclusi.
+**Mixed currencies.** There is no exchange-rate conversion: totals only sum the subscriptions in the prevailing currency; `mixed_currency` and `other_currency_count` report the excluded ones.
 
-**Rinnovo automatico.** La data di rinnovo che inserisci è un'ancora: il sensore calcola da solo il prossimo rinnovo avanzando di cicli interi, senza scrivere nulla in configurazione. Per fermare il conteggio usa "in pausa".
+**Automatic renewal.** The renewal date you enter is an anchor: the sensor computes the next renewal by itself by adding whole cycles, without writing anything to the configuration. To stop the count use "paused".
 
-## Storico prezzi
+## Price history
 
-Funziona in due modi, combinati:
+It works in two combined ways:
 
-- **Automatico** — quando modifichi il costo dalle Opzioni dell'integrazione, la variazione viene registrata con la data odierna.
-- **Manuale retroattivo** — il servizio `subscription_tracker.add_price_history` permette di inserire i prezzi precedenti all'installazione, così il grafico è pieno da subito.
+- **Automatic** — when you change the cost from the integration's Options, the change is recorded with today's date.
+- **Manual, retroactive** — the `subscription_tracker.add_price_history` service lets you enter prices from before the installation, so the chart is populated right away.
 
 ```yaml
 service: subscription_tracker.add_price_history
@@ -48,29 +50,29 @@ data:
   date: "2021-03-01"
 ```
 
-## Installazione
+## Installation
 
-### Marketplace di Home Assistant (2026.11 o successivo)
-1. Impostazioni → Marketplace → menu (⋮) → **Aggiungi da link** (serve collegare un account GitHub)
-2. Inserisci `ivp-arch/ha-subscription-tracker`
-3. Installa "Subscription Tracker" e riavvia Home Assistant
+### Home Assistant Marketplace (2026.11 or later)
+1. Settings → Marketplace → menu (⋮) → **Add from link** (requires connecting a GitHub account)
+2. Enter `ivp-arch/ha-subscription-tracker`
+3. Install "Subscription Tracker" and restart Home Assistant
 
-### HACS (Home Assistant precedente alla 2026.11)
-HACS → Integrazioni → menu (⋮) → Repository personalizzati → aggiungi l'URL di questo repo, categoria "Integrazione".
+### HACS (Home Assistant before 2026.11)
+HACS → Integrations → menu (⋮) → Custom repositories → add this repo's URL, category "Integration".
 
-### Manuale
-Copia `custom_components/subscription_tracker` nella cartella `custom_components` della tua istanza, poi riavvia.
+### Manual
+Copy `custom_components/subscription_tracker` into the `custom_components` folder of your instance, then restart.
 
-## Configurazione
+## Configuration
 
-Impostazioni → Dispositivi e servizi → Aggiungi integrazione → "Subscription Tracker". Ripeti per ogni abbonamento. I dati si modificano dalle Opzioni dell'integrazione, senza rimuovere e ricreare.
+Settings → Devices & services → Add integration → "Subscription Tracker". Repeat for each subscription. Data can be edited from the integration's Options, without removing and recreating it.
 
-## Automazioni
+## Automations
 
-Il sensore di riepilogo rende banali le automazioni più utili:
+The summary sensor makes the most useful automations simple:
 
 ```yaml
-# Avviso settimanale sui rinnovi imminenti
+# Weekly notice about upcoming renewals
 trigger:
   - platform: time
     at: "09:00:00"
@@ -80,15 +82,15 @@ condition:
 action:
   - service: notify.mobile_app
     data:
-      title: Rinnovi in arrivo
+      title: Upcoming renewals
       message: >-
         {% for s in state_attr('sensor.abbonamenti_totale','expiring') %}
-        {{ s.name }}: {{ s.cost }} € tra {{ s.days }} gg.
+        {{ s.name }}: {{ s.cost }} € in {{ s.days }} days.
         {% endfor %}
 ```
 
 ```yaml
-# Soglia di budget superata (il budget si imposta nella voce "Riepilogo abbonamenti")
+# Budget threshold exceeded (the budget is set in the "Riepilogo abbonamenti" entry)
 trigger:
   - platform: state
     entity_id: sensor.abbonamenti_totale
@@ -97,11 +99,11 @@ trigger:
 action:
   - service: notify.mobile_app
     data:
-      message: "Spesa abbonamenti sopra il budget mensile."
+      message: "Subscription spending is above the monthly budget."
 ```
 
 ```yaml
-# Aumento di prezzo rilevato su un servizio
+# Price increase detected on a service
 trigger:
   - platform: state
     entity_id: sensor.netflix_premium
@@ -110,13 +112,13 @@ action:
   - service: notify.mobile_app
     data:
       message: >-
-        Netflix ha cambiato prezzo: ora {{ state_attr('sensor.netflix_premium','cost') }} €,
-        {{ state_attr('sensor.netflix_premium','price_change_pct') }} % rispetto all'inizio.
+        Netflix changed its price: now {{ state_attr('sensor.netflix_premium','cost') }} €,
+        {{ state_attr('sensor.netflix_premium','price_change_pct') }} % compared to the start.
 ```
 
-## Sviluppo
+## Development
 
-I calcoli sono in `custom_components/subscription_tracker/calc.py`, senza dipendenze da Home Assistant. I test (`tests/`) usano `pytest-homeassistant-custom-component`:
+Calculations live in `custom_components/subscription_tracker/calc.py`, with no dependency on Home Assistant. The tests (`tests/`) use `pytest-homeassistant-custom-component`:
 
 ```bash
 pip install -r requirements_test.txt
@@ -125,9 +127,11 @@ pytest
 
 ## Roadmap
 
-- Card Lovelace in stile "Orbit" con budget e timeline ([repo della card](https://github.com/ivp-arch/ha-subscription-tracker-card))
-- Blueprint di automazione pronti all'uso
+- Selector option labels translated in the configuration UI
+- Ready-to-use automation blueprints
 
-## Nota
+The companion Lovelace card (budget, timeline, "Orbit" theme) lives in the [card repository](https://github.com/ivp-arch/ha-subscription-tracker-card).
 
-L'integrazione non si collega agli account reali dei servizi: i dati vengono inseriti manualmente. Non gestisce credenziali né pagamenti.
+## Note
+
+The integration does not connect to real service accounts: data is entered manually. It handles no credentials or payments.

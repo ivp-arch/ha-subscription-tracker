@@ -1,67 +1,67 @@
-# Contratto attributi — versione 1
+# Attribute contract — version 1
 
-Questo documento è il contratto tra l'integrazione (dati, calcoli, entità) e le card (sola presentazione). Ogni sensore espone `contract_version: 1`.
+This document is the contract between the integration (data, calculations, entities) and the cards (presentation only). Every sensor exposes `contract_version: 1`.
 
-**Regole di versione.** Aggiungere un attributo non cambia la versione. Rimuovere, rinominare o cambiare il tipo o il significato di un attributo esistente richiede di incrementare `contract_version`, di aggiornare questo file e le card. Le card devono ignorare gli attributi che non conoscono.
+**Versioning rules.** Adding an attribute does not change the version. Removing or renaming an existing attribute, or changing its type or meaning, requires incrementing `contract_version` and updating this file and the cards. Cards must ignore attributes they do not know.
 
-**Dati mai esposti.** Il metodo di pagamento (`payment_note`) non compare in nessun attributo di nessuna entità. Lo verifica un test (`test_payment_method_never_in_attributes`). Resta però nella configurazione dell'integrazione e quindi nei backup di Home Assistant.
+**Data never exposed.** The payment method (`payment_note`) does not appear in any attribute of any entity. A test verifies it (`test_payment_method_never_in_attributes`). It does remain in the integration's configuration and therefore in Home Assistant backups.
 
-## Sensore di un abbonamento
+## Single subscription sensor
 
-Stato: giorni al prossimo rinnovo (intero, mai negativo se la data è valida), unità `days`.
+State: days until the next renewal (integer, never negative if the date is valid), unit `days`.
 
-| Attributo | Tipo | Note |
+| Attribute | Type | Notes |
 |---|---|---|
-| `contract_version` | int | Sempre `1` |
-| `service` | str | Chiave del servizio (`netflix`, `altro`, ...) |
-| `display_name` | str | Nome mostrabile |
+| `contract_version` | int | Always `1` |
+| `service` | str | Service key (`netflix`, `altro`, ...) |
+| `display_name` | str | Displayable name |
 | `category` | str | `video`, `audio`, `altro` |
-| `color` | str \| null | Esadecimale; `null` per servizi personalizzati |
-| `plan` | str \| null | Piano/tier |
-| `cost` | float | Costo per ciclo |
+| `color` | str \| null | Hex; `null` for custom services |
+| `plan` | str \| null | Plan/tier |
+| `cost` | float | Cost per cycle |
 | `currency` | str | `EUR`, `USD`, `GBP` |
 | `billing_cycle` | str | `monthly`, `quarterly`, `yearly` |
-| `monthly_cost` / `yearly_cost` | float | Costo normalizzato |
-| `next_renewal` | str (ISO) \| null | Prossimo rinnovo **effettivo** (vedi sotto) |
-| `renewal_advanced` | bool | `true` se `next_renewal` differisce dalla data inserita |
-| `shared_count` | int | Persone che condividono (≥ 1) |
+| `monthly_cost` / `yearly_cost` | float | Normalized cost |
+| `next_renewal` | str (ISO) \| null | **Effective** next renewal (see below) |
+| `renewal_advanced` | bool | `true` if `next_renewal` differs from the entered date |
+| `shared_count` | int | People sharing (≥ 1) |
 | `cost_per_person` | float | `cost / shared_count` |
-| `status` | str | `active`, `expiring_soon`, `paused`. `expired` è riservato e non viene prodotto |
+| `status` | str | `active`, `expiring_soon`, `paused`. `expired` is reserved and is not produced |
 | `paused` | bool | |
-| `notes` | str \| null | Testo libero: non inserirvi dati personali, finisce nel recorder |
-| `price_history` | list | `[{date, price}]` ordinata per data |
-| `subscribed_since`, `subscribed_days` | str (ISO), int | Solo se "Cliente dal" è impostato |
-| `price_change_total`, `price_change_pct`, `price_changes_count` | float, float, int | Solo con almeno 2 punti di storico |
+| `notes` | str \| null | Free text: do not enter personal data, it ends up in the recorder |
+| `price_history` | list | `[{date, price}]` sorted by date |
+| `subscribed_since`, `subscribed_days` | str (ISO), int | Only if "Customer since" is set |
+| `price_change_total`, `price_change_pct`, `price_changes_count` | float, float, int | Only with at least 2 history points |
 
-**Rinnovo automatico.** La data inserita dall'utente è un'ancora: `next_renewal` è la prima data uguale o successiva a oggi ottenuta sommando cicli interi all'ancora (si parte sempre dall'ancora, quindi un rinnovo del 31 gennaio mensile cade il 28 febbraio e torna al 31 marzo). Non viene scritto nulla in configurazione. Per sospendere il conteggio si usa "in pausa".
+**Automatic renewal.** The date entered by the user is an anchor: `next_renewal` is the first date equal to or after today obtained by adding whole cycles to the anchor (it always starts from the anchor, so a monthly renewal on January 31 falls on February 28 and goes back to March 31). Nothing is written to the configuration. To stop the count use "paused".
 
-## Sensore di riepilogo (`sensor.abbonamenti_totale`)
+## Summary sensor (`sensor.abbonamenti_totale`)
 
-Posseduto dalla voce "Riepilogo abbonamenti" (hub), creata automaticamente. Stato: costo mensile totale degli abbonamenti non in pausa, nella valuta prevalente.
+Owned by the "Riepilogo abbonamenti" entry (hub), created automatically. State: total monthly cost of the non-paused subscriptions, in the prevailing currency.
 
-| Attributo | Tipo | Note |
+| Attribute | Type | Notes |
 |---|---|---|
 | `contract_version` | int | `1` |
-| `currency` | str | Valuta prevalente tra gli abbonamenti attivi (`EUR` se non ce ne sono) |
-| `mixed_currency` | bool | `true` se ci sono abbonamenti in altre valute |
-| `other_currency_count` | int | Quanti abbonamenti attivi sono esclusi dai totali per valuta diversa. Nessuna conversione di cambio |
+| `currency` | str | Prevailing currency among active subscriptions (`EUR` if there are none) |
+| `mixed_currency` | bool | `true` if there are subscriptions in other currencies |
+| `other_currency_count` | int | How many active subscriptions are excluded from the totals because of a different currency. No exchange-rate conversion |
 | `yearly_cost` | float | |
 | `active_count`, `paused_count` | int | |
-| `by_category` | dict str→float | Costo mensile per categoria |
-| `expiring_count`, `expiring_soon_total` | int, float | Rinnovi entro la soglia di preavviso del singolo abbonamento |
-| `expiring` | list | Elementi come sotto, ordinati per giorni |
-| `upcoming_days` | int | Finestra della timeline, oggi `30` |
-| `upcoming` | list | Rinnovi entro `upcoming_days`, ordinati per giorni e nome |
-| `upcoming_total` | float | Somma dei costi di `upcoming` |
-| `budget` | float \| null | Soglia mensile impostata nell'hub; `null` se non impostata o 0 |
-| `budget_used_pct` | float \| null | Spesa mensile / budget × 100, un decimale; `null` senza budget |
-| `budget_remaining` | float \| null | `budget - spesa`; negativo se superato |
-| `budget_exceeded` | bool | `true` se la spesa mensile supera il budget |
+| `by_category` | dict str→float | Monthly cost per category |
+| `expiring_count`, `expiring_soon_total` | int, float | Renewals within the notice threshold of each subscription |
+| `expiring` | list | Items as below, sorted by days |
+| `upcoming_days` | int | Timeline window, currently `30` |
+| `upcoming` | list | Renewals within `upcoming_days`, sorted by days and name |
+| `upcoming_total` | float | Sum of the costs in `upcoming` |
+| `budget` | float \| null | Monthly threshold set in the hub; `null` if not set or 0 |
+| `budget_used_pct` | float \| null | Monthly spend / budget × 100, one decimal; `null` without a budget |
+| `budget_remaining` | float \| null | `budget - spend`; negative if exceeded |
+| `budget_exceeded` | bool | `true` if the monthly spend exceeds the budget |
 
-Elemento di `expiring` e `upcoming`: `{name, service, days, cost, renewal}`, con `days` ≥ 0, `renewal` ISO, `cost` per ciclo.
+Item of `expiring` and `upcoming`: `{name, service, days, cost, renewal}`, with `days` ≥ 0, `renewal` ISO, `cost` per cycle.
 
-Il budget si imposta da Impostazioni → Dispositivi e servizi → Subscription Tracker → "Riepilogo abbonamenti" → Configura.
+The budget is set from Settings → Devices & services → Subscription Tracker → "Riepilogo abbonamenti" → Configure.
 
-## Non incluso nella versione 1
+## Not included in version 1
 
-La variazione di spesa rispetto al mese precedente (usata nel mockup Orbit) richiede uno storico mensile del totale che oggi non esiste: non è nel contratto.
+The change in spending compared to the previous month (used in the Orbit mockup) requires a monthly history of the total that does not exist today: it is not part of the contract.
