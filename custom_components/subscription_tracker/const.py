@@ -38,6 +38,12 @@ UPCOMING_DAYS = 30
 # Internal signal: recompute the summary.
 SIGNAL_SUMMARY_UPDATE = f"{DOMAIN}_summary_update"
 
+# Monthly totals of the summary, kept in their own file under .storage
+HISTORY_STORE_KEY = f"{DOMAIN}.monthly_history"
+HISTORY_STORE_VERSION = 1
+HISTORY_KEEP_MONTHS = 24
+HISTORY_EXPOSED_MONTHS = 12
+
 CUSTOM_SERVICE_KEY = "other"
 
 # --- Billing cycles -------------------------------------------------------

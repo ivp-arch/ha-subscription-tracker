@@ -10,6 +10,7 @@ from homeassistant.core import HomeAssistant, ServiceCall, callback
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import config_validation as cv, entity_registry as er
 from homeassistant.helpers.dispatcher import async_dispatcher_send
+from homeassistant.helpers.storage import Store
 from homeassistant.helpers.typing import ConfigType
 
 from .const import (
@@ -19,6 +20,8 @@ from .const import (
     CONF_PRICE_HISTORY,
     CONF_SERVICE,
     DOMAIN,
+    HISTORY_STORE_KEY,
+    HISTORY_STORE_VERSION,
     SERVICE_ADD_PRICE_HISTORY,
     SIGNAL_SUMMARY_UPDATE,
 )
@@ -107,6 +110,9 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
         # it back (the budget is reset). With no subscription left, leave it deleted.
         if any(not e.data.get(CONF_HUB) for e in hass.config_entries.async_entries(DOMAIN)):
             _async_ensure_hub(hass)
+        else:
+            # Nothing left to track: the monthly history goes away with the last entry.
+            await Store(hass, HISTORY_STORE_VERSION, HISTORY_STORE_KEY).async_remove()
         return
     # After a subscription is removed the summary must be recomputed.
     async_dispatcher_send(hass, SIGNAL_SUMMARY_UPDATE)

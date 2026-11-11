@@ -58,11 +58,13 @@ Owned by the "Subscription summary" entry (hub), created automatically. State: t
 | `budget_used_pct` | float \| null | Monthly spend / budget × 100, one decimal; `null` without a budget |
 | `budget_remaining` | float \| null | `budget - spend`; negative if exceeded |
 | `budget_exceeded` | bool | `true` if the monthly spend exceeds the budget |
+| `previous_month_cost` | float \| null | Monthly total recorded for the previous calendar month; `null` if that month was not recorded (first month after installation, gaps) or was in another currency |
+| `change_vs_previous` | float \| null | Current total − `previous_month_cost`; negative if spending went down. `null` when there is no previous month |
+| `change_vs_previous_pct` | float \| null | `change_vs_previous` / `previous_month_cost` × 100, one decimal; `null` when there is no previous month or it was 0 |
+| `monthly_history` | list | `[{month, total, currency}]`, oldest first, at most the last 12 months **including the current one**. `month` is `YYYY-MM` in the Home Assistant time zone |
 
 Item of `expiring` and `upcoming`: `{name, display_name, service, days, cost, renewal}`, with `days` ≥ 0, `renewal` ISO, `cost` per cycle. `name` is the entry title (service and plan, e.g. "Netflix (Premium)"); `display_name` is the service name, the same as the single-subscription sensor attribute ("Netflix"). Cards should show `display_name`.
 
 The budget is set from Settings → Devices & services → Subscription Tracker → "Subscription summary" → Configure.
 
-## Not included in version 1
-
-The change in spending compared to the previous month (used in the Orbit mockup) requires a monthly history of the total that does not exist today: it is not part of the contract.
+**Monthly history.** The "month" is the normalized monthly total (the state of the summary), not what was actually charged. The integration records the latest total of the current month in its own file (`.storage/subscription_tracker.monthly_history`, last 24 months kept, 12 exposed); when the month changes the value stops being updated, so each past month holds the total as it was on its last day. History starts at installation: until a full previous month has been recorded the comparison attributes are `null`, and cards must hide the comparison instead of showing 0. The file is not part of any subscription: it survives deleting and recreating the summary entry, and is removed together with the last Subscription Tracker entry.

@@ -30,6 +30,8 @@ The payment method is **never** exposed as an attribute: it only stays in the co
 
 `sensor.subscriptions_total` — state = total monthly cost. It belongs to a dedicated entry, "Subscription summary", created automatically, so it does not depend on any single subscription. Main attributes: `yearly_cost`, `active_count`, `paused_count`, `by_category`, `expiring` (renewals within the notice period), `upcoming` (timeline of renewals in the next 30 days) and `upcoming_total`, `budget`, `budget_used_pct`, `budget_remaining`, `budget_exceeded`. The full list, with types and versioning rules, is in [`docs/attributes-contract.md`](docs/attributes-contract.md).
 
+**Monthly history.** From version 0.3.0 the summary also exposes `previous_month_cost`, `change_vs_previous`, `change_vs_previous_pct` and `monthly_history` (up to 12 months). Totals are recorded by the integration from the day it is updated: the comparison is empty until a full month has been recorded, so nothing is reconstructed for the past.
+
 **Monthly budget.** Set it from Devices & services → Subscription Tracker → "Subscription summary" → Configure. A value of 0 disables the threshold.
 
 If you delete the "Subscription summary" entry while subscriptions still exist, it is created again right away (the budget is reset to none). Once no subscription is left, deleting it is final.

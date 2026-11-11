@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import calendar
 from collections import Counter
-from datetime import date
+from datetime import date, timedelta
 from typing import Any
 
 from .const import (
@@ -155,4 +155,54 @@ def build_summary(
             "budget_remaining": budget_remaining,
             "budget_exceeded": budget_exceeded,
         },
+    }
+
+
+def month_key(d: date) -> str:
+    """`YYYY-MM` of a date."""
+    return f"{d.year:04d}-{d.month:02d}"
+
+
+def previous_month_key(d: date) -> str:
+    """`YYYY-MM` of the calendar month before the one containing `d`."""
+    return month_key(d.replace(day=1) - timedelta(days=1))
+
+
+def update_monthly_history(
+    history: list[dict[str, Any]],
+    today: date,
+    total: float,
+    currency: str,
+    keep: int,
+) -> list[dict[str, Any]]:
+    """Record the latest total for the current month; earlier months stay frozen.
+
+    Returns a new list sorted by month, trimmed to the last `keep` months.
+    """
+    key = month_key(today)
+    months = [h for h in history if h.get("month") != key]
+    months.append({"month": key, "total": round(total, 2), "currency": currency})
+    months.sort(key=lambda h: h["month"])
+    return months[-keep:]
+
+
+def history_comparison(
+    history: list[dict[str, Any]], today: date, total: float, currency: str
+) -> dict[str, Any]:
+    """Compare the current total with the previous calendar month.
+
+    All values are None when the previous month was not recorded (for example just
+    after installation) or was recorded in another currency.
+    """
+    previous = next(
+        (h for h in history if h.get("month") == previous_month_key(today)), None
+    )
+    if previous is None or previous.get("currency") != currency:
+        return {"previous_month_cost": None, "change_vs_previous": None, "change_vs_previous_pct": None}
+    prev_total = float(previous["total"])
+    change = round(total - prev_total, 2)
+    return {
+        "previous_month_cost": round(prev_total, 2),
+        "change_vs_previous": change,
+        "change_vs_previous_pct": round(change / prev_total * 100, 1) if prev_total else None,
     }

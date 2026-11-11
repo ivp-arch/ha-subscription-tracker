@@ -12,9 +12,18 @@ from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dis
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.event import async_track_point_in_time
+from homeassistant.helpers.storage import Store
 import homeassistant.util.dt as dt_util
 
-from .calc import build_summary, monthly_cost, next_renewal, parse_date, subscription_status
+from .calc import (
+    build_summary,
+    history_comparison,
+    monthly_cost,
+    next_renewal,
+    parse_date,
+    subscription_status,
+    update_monthly_history,
+)
 from .const import (
     CONF_BILLING_CYCLE,
     CONF_BUDGET,
@@ -37,6 +46,10 @@ from .const import (
     CUSTOM_SERVICE_KEY,
     DEFAULT_EXPIRING_SOON_DAYS,
     DOMAIN,
+    HISTORY_EXPOSED_MONTHS,
+    HISTORY_KEEP_MONTHS,
+    HISTORY_STORE_KEY,
+    HISTORY_STORE_VERSION,
     KNOWN_SERVICES,
     SIGNAL_SUMMARY_UPDATE,
     UPCOMING_DAYS,
@@ -237,6 +250,8 @@ class SubscriptionSummarySensor(SensorEntity):
         self._monthly = 0.0
         self._attrs: dict = {}
         self._unsub_midnight = None
+        self._store: Store = Store(hass, HISTORY_STORE_VERSION, HISTORY_STORE_KEY)
+        self._history: list[dict] | None = None
 
     @property
     def native_unit_of_measurement(self) -> str:
@@ -310,4 +325,26 @@ class SubscriptionSummarySensor(SensorEntity):
             UPCOMING_DAYS,
         )
         self._monthly = result["monthly"]
-        self._attrs = {"contract_version": CONTRACT_VERSION, **result["attributes"]}
+        attrs = result["attributes"]
+        today = dt_util.now().date()
+
+        if self._history is None:
+            stored = await self._store.async_load()
+            self._history = list(stored.get("months", [])) if isinstance(stored, dict) else []
+        updated = update_monthly_history(
+            self._history, today, self._monthly, attrs["currency"], HISTORY_KEEP_MONTHS
+        )
+        if updated != self._history:
+            self._history = updated
+            self._store.async_delay_save(self._history_to_save, 30)
+
+        self._attrs = {
+            "contract_version": CONTRACT_VERSION,
+            **attrs,
+            **history_comparison(self._history, today, self._monthly, attrs["currency"]),
+            "monthly_history": self._history[-HISTORY_EXPOSED_MONTHS:],
+        }
+
+    @callback
+    def _history_to_save(self) -> dict:
+        return {"months": self._history or []}
