@@ -57,6 +57,10 @@
           "budget": "Monthly budget"
         }
       }
+    },
+    "error": {
+      "custom_name_required": "Enter a name if you select 'Other'",
+      "duplicate_subscription": "A subscription with this service and plan already exists"
     }
   },
   "services": {

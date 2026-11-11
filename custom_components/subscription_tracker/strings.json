@@ -57,6 +57,10 @@
           "budget": "Budget mensile"
         }
       }
+    },
+    "error": {
+      "custom_name_required": "Inserisci un nome se selezioni 'Altro'",
+      "duplicate_subscription": "Esiste già un abbonamento con questo servizio e questo piano"
     }
   },
   "services": {

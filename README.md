@@ -32,6 +32,8 @@ The payment method is **never** exposed as an attribute: it only stays in the co
 
 **Monthly budget.** Set it from Devices & services → Subscription Tracker → "Subscription summary" → Configure. A value of 0 disables the threshold.
 
+If you delete the "Subscription summary" entry while subscriptions still exist, it is created again right away (the budget is reset to none). Once no subscription is left, deleting it is final.
+
 **Mixed currencies.** There is no exchange-rate conversion: totals only sum the subscriptions in the prevailing currency; `mixed_currency` and `other_currency_count` report the excluded ones.
 
 **Automatic renewal.** The renewal date you enter is an anchor: the sensor computes the next renewal by itself by adding whole cycles, without writing anything to the configuration. To stop the count use "paused".

@@ -1,13 +1,13 @@
 """Config flow for Subscription Tracker."""
 from __future__ import annotations
 
-from datetime import date
 from typing import Any
 
 import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.core import callback
+from homeassistant.util import dt as dt_util
 from homeassistant.helpers.selector import (
     BooleanSelector,
     DateSelector,
@@ -80,7 +80,7 @@ def _build_schema(defaults: dict[str, Any] | None = None, *, is_options: bool = 
             CONF_BILLING_CYCLE, default=d.get(CONF_BILLING_CYCLE, BILLING_CYCLE_MONTHLY)
         ): SelectSelector(SelectSelectorConfig(options=BILLING_CYCLES, mode=SelectSelectorMode.DROPDOWN)),
         vol.Required(
-            CONF_RENEWAL_DATE, default=d.get(CONF_RENEWAL_DATE, date.today().isoformat())
+            CONF_RENEWAL_DATE, default=d.get(CONF_RENEWAL_DATE, dt_util.now().date().isoformat())
         ): DateSelector(),
         # No "" default: DateSelector validates with cv.date and rejects the empty string.
         vol.Optional(
@@ -135,7 +135,7 @@ class SubscriptionTrackerConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 # The initial price opens the history, dated to the creation day.
                 options = {
                     CONF_PRICE_HISTORY: [
-                        {"date": date.today().isoformat(), "price": float(user_input[CONF_COST])}
+                        {"date": dt_util.now().date().isoformat(), "price": float(user_input[CONF_COST])}
                     ]
                 }
                 return self.async_create_entry(title=title, data=user_input, options=options)
@@ -175,18 +175,29 @@ class SubscriptionTrackerOptionsFlow(config_entries.OptionsFlow):
 
                 # Automatic capture: if the cost changes, record the change with today's date.
                 if abs(new_cost - old_cost) > 0.001:
-                    today = date.today().isoformat()
+                    today = dt_util.now().date().isoformat()
                     history = [h for h in history if h.get("date") != today]
                     history.append({"date": today, "price": new_cost})
                     history.sort(key=lambda h: h["date"])
 
-                self.hass.config_entries.async_update_entry(
-                    self._config_entry,
-                    title=_title(user_input),
-                    data=user_input,
-                    options={**self._config_entry.options, CONF_PRICE_HISTORY: history},
-                )
-                return self.async_create_entry(title="", data={})
+                title = _title(user_input)
+                unique_id = f"{user_input[CONF_SERVICE]}_{title}"
+                # Keep the config entry unique_id in step with service and plan, so
+                # duplicate detection stays correct; refuse a clash with another entry.
+                if any(
+                    e.unique_id == unique_id and e.entry_id != self._config_entry.entry_id
+                    for e in self.hass.config_entries.async_entries(DOMAIN)
+                ):
+                    errors["base"] = "duplicate_subscription"
+                else:
+                    self.hass.config_entries.async_update_entry(
+                        self._config_entry,
+                        title=title,
+                        unique_id=unique_id,
+                        data=user_input,
+                        options={**self._config_entry.options, CONF_PRICE_HISTORY: history},
+                    )
+                    return self.async_create_entry(title="", data={})
 
         current = dict(self._config_entry.data)
         current.setdefault(CONF_PAUSED, self._config_entry.options.get(CONF_PAUSED, False))
