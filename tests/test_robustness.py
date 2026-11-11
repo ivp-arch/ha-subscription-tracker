@@ -218,3 +218,50 @@ async def test_month_end_anchor_across_midnights(hass, freezer):
     st = hass.states.get("sensor.netflix")
     assert st.attributes["next_renewal"] == "2026-03-31" and st.state == "30"
     assert hass.states.get(SUMMARY).attributes["upcoming"][0]["days"] == 30
+
+
+# ---------- options flow must not wipe the options ----------
+
+
+async def test_options_flow_keeps_price_history(hass):
+    a = _sub("netflix", "Netflix", cost=10.0)
+    a.options["price_history"].insert(0, {"date": "2026-01-01", "price": 8.0})
+    await _setup(hass, a)
+
+    r = await hass.config_entries.options.async_init(a.entry_id)
+    r = await hass.config_entries.options.async_configure(r["flow_id"], _form("netflix", cost=12.0))
+    assert r["type"] == FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+
+    prices = [(h["date"], h["price"]) for h in a.options["price_history"]]
+    assert ("2026-01-01", 8.0) in prices          # manual point kept
+    assert (_today().isoformat(), 12.0) in prices  # new cost recorded
+    st = hass.states.get("sensor.netflix")
+    assert len(st.attributes["price_history"]) == len(prices) == 2  # today point replaced, not duplicated
+
+
+async def test_options_flow_without_cost_change_keeps_history(hass):
+    a = _sub("netflix", "Netflix", cost=10.0)
+    a.options["price_history"].insert(0, {"date": "2026-01-01", "price": 8.0})
+    await _setup(hass, a)
+    r = await hass.config_entries.options.async_init(a.entry_id)
+    r = await hass.config_entries.options.async_configure(
+        r["flow_id"], _form("netflix", cost=10.0, shared_count=2)
+    )
+    await hass.async_block_till_done()
+    assert [h["price"] for h in a.options["price_history"]][0] == 8.0
+    assert len(hass.states.get("sensor.netflix").attributes["price_history"]) == 2
+
+
+async def test_price_history_service_survives_an_edit(hass):
+    a = _sub("netflix", "Netflix", cost=10.0)
+    await _setup(hass, a)
+    await hass.services.async_call(
+        DOMAIN, "add_price_history",
+        {"entity_id": "sensor.netflix", "price": 7.0, "date": "2026-06-01"}, blocking=True,
+    )
+    await hass.async_block_till_done()
+    r = await hass.config_entries.options.async_init(a.entry_id)
+    await hass.config_entries.options.async_configure(r["flow_id"], _form("netflix", cost=10.0))
+    await hass.async_block_till_done()
+    assert any(h["date"] == "2026-06-01" for h in hass.states.get("sensor.netflix").attributes["price_history"])

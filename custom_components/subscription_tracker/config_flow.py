@@ -190,14 +190,17 @@ class SubscriptionTrackerOptionsFlow(config_entries.OptionsFlow):
                 ):
                     errors["base"] = "duplicate_subscription"
                 else:
+                    options = {**self._config_entry.options, CONF_PRICE_HISTORY: history}
                     self.hass.config_entries.async_update_entry(
                         self._config_entry,
                         title=title,
                         unique_id=unique_id,
                         data=user_input,
-                        options={**self._config_entry.options, CONF_PRICE_HISTORY: history},
+                        options=options,
                     )
-                    return self.async_create_entry(title="", data={})
+                    # Home Assistant stores the returned data as the entry options: it must
+                    # be the full options, otherwise the price history would be wiped.
+                    return self.async_create_entry(title="", data=options)
 
         current = dict(self._config_entry.data)
         current.setdefault(CONF_PAUSED, self._config_entry.options.get(CONF_PAUSED, False))
