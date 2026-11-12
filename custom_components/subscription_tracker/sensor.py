@@ -29,6 +29,7 @@ from .const import (
     CONF_BUDGET,
     CONF_CATEGORY,
     CONF_COST,
+    CONF_COST_IS_MY_SHARE,
     CONF_CURRENCY,
     CONF_CUSTOM_ICON,
     CONF_CUSTOM_NAME,
@@ -174,6 +175,7 @@ class SubscriptionSensor(SensorEntity):
         cost = float(self._data.get(CONF_COST, 0))
         cycle = self._data.get(CONF_BILLING_CYCLE)
         shared = int(self._data.get(CONF_SHARED_COUNT) or 1)
+        my_share = bool(self._data.get(CONF_COST_IS_MY_SHARE))
         history = self._price_history()
         since = parse_date(self._data.get(CONF_SUBSCRIBED_SINCE))
         renewal = self._renewal()
@@ -195,7 +197,8 @@ class SubscriptionSensor(SensorEntity):
             "next_renewal": renewal.isoformat() if renewal else None,
             "renewal_advanced": bool(renewal and anchor and renewal != anchor),
             "shared_count": shared,
-            "cost_per_person": round(cost / shared, 2),
+            "cost_per_person": round(cost if my_share else cost / shared, 2),
+            "cost_is_my_share": my_share,
             "status": self._status(),
             "paused": self._is_paused(),
             "notes": self._data.get(CONF_NOTES) or None,

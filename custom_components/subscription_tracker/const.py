@@ -14,6 +14,7 @@ CONF_CURRENCY = "currency"
 CONF_BILLING_CYCLE = "billing_cycle"
 CONF_RENEWAL_DATE = "renewal_date"
 CONF_SHARED_COUNT = "shared_count"
+CONF_COST_IS_MY_SHARE = "cost_is_my_share"
 CONF_PAYMENT_NOTE = "payment_note"
 CONF_SUBSCRIBED_SINCE = "subscribed_since"
 CONF_PAUSED = "paused"
@@ -49,11 +50,13 @@ CUSTOM_SERVICE_KEY = "other"
 # --- Billing cycles -------------------------------------------------------
 BILLING_CYCLE_MONTHLY = "monthly"
 BILLING_CYCLE_QUARTERLY = "quarterly"
+BILLING_CYCLE_SEMIANNUAL = "semiannual"
 BILLING_CYCLE_YEARLY = "yearly"
 
 BILLING_CYCLES = [
     BILLING_CYCLE_MONTHLY,
     BILLING_CYCLE_QUARTERLY,
+    BILLING_CYCLE_SEMIANNUAL,
     BILLING_CYCLE_YEARLY,
 ]
 
@@ -61,6 +64,7 @@ BILLING_CYCLES = [
 BILLING_CYCLE_MONTHS = {
     BILLING_CYCLE_MONTHLY: 1,
     BILLING_CYCLE_QUARTERLY: 3,
+    BILLING_CYCLE_SEMIANNUAL: 6,
     BILLING_CYCLE_YEARLY: 12,
 }
 

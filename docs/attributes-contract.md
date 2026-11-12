@@ -21,12 +21,13 @@ State: days until the next renewal (integer, never negative if the date is valid
 | `plan` | str \| null | Plan/tier |
 | `cost` | float | Cost per cycle |
 | `currency` | str | `EUR`, `USD`, `GBP` |
-| `billing_cycle` | str | `monthly`, `quarterly`, `yearly` |
+| `billing_cycle` | str | `monthly`, `quarterly`, `semiannual` (every 6 months, since 0.4.0), `yearly` |
 | `monthly_cost` / `yearly_cost` | float | Normalized cost |
 | `next_renewal` | str (ISO) \| null | **Effective** next renewal (see below) |
 | `renewal_advanced` | bool | `true` if `next_renewal` differs from the entered date |
 | `shared_count` | int | People sharing (≥ 1) |
-| `cost_per_person` | float | `cost / shared_count` |
+| `cost_per_person` | float | `cost / shared_count`; equal to `cost` when `cost_is_my_share` is `true` |
+| `cost_is_my_share` | bool | `true` when the user entered, as `cost`, only their own share (they pay another person who holds the subscription). Totals always count `cost` as entered; `shared_count` and this flag only affect `cost_per_person` (since 0.4.0) |
 | `status` | str | `active`, `expiring_soon`, `paused`. `expired` is reserved and is not produced |
 | `paused` | bool | |
 | `notes` | str \| null | Free text: do not enter personal data, it ends up in the recorder |

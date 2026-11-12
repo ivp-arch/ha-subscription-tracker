@@ -28,6 +28,7 @@ from .const import (
     CONF_BUDGET,
     CONF_CATEGORY,
     CONF_COST,
+    CONF_COST_IS_MY_SHARE,
     CONF_CURRENCY,
     CONF_CUSTOM_ICON,
     CONF_CUSTOM_NAME,
@@ -90,6 +91,9 @@ def _build_schema(defaults: dict[str, Any] | None = None, *, is_options: bool = 
         vol.Optional(CONF_SHARED_COUNT, default=d.get(CONF_SHARED_COUNT, 1)): NumberSelector(
             NumberSelectorConfig(min=1, step=1, mode=NumberSelectorMode.BOX)
         ),
+        vol.Optional(
+            CONF_COST_IS_MY_SHARE, default=d.get(CONF_COST_IS_MY_SHARE, False)
+        ): BooleanSelector(),
         vol.Optional(CONF_PAYMENT_NOTE, default=d.get(CONF_PAYMENT_NOTE, "")): TextSelector(),
         vol.Optional(
             CONF_EXPIRING_SOON_DAYS, default=d.get(CONF_EXPIRING_SOON_DAYS, DEFAULT_EXPIRING_SOON_DAYS)

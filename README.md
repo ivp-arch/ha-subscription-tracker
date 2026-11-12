@@ -15,7 +15,7 @@ Each subscription creates a sensor with **state = days until renewal** and these
 | Attribute | Description |
 |---|---|
 | `monthly_cost` / `yearly_cost` | Normalized cost, so yearly plans are comparable with monthly ones |
-| `cost_per_person` | Cost divided by the number of people sharing |
+| `cost_per_person` | Cost divided by the number of people sharing, or the cost itself if you flagged it as your own share (`cost_is_my_share`, since 0.4.0: for plans held by someone else, where you pay only your quota) |
 | `status` | `active` / `expiring_soon` / `paused` |
 | `subscribed_days` | For how many days you have been a customer |
 | `price_history` | List of `{date, price}` |

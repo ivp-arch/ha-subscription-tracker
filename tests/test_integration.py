@@ -171,3 +171,54 @@ async def test_timeline_uses_service_display_name(hass):
     await _setup(hass, a)
     up = hass.states.get(SUMMARY).attributes["upcoming"][0]
     assert up["name"] == "Netflix (Premium)" and up["display_name"] == "Netflix"
+
+
+async def test_semiannual_cycle_attributes_and_summary(hass):
+    a = _sub("netflix", "Netflix", cost=60.0, billing_cycle="semiannual")
+    await _setup(hass, a)
+    at = hass.states.get("sensor.netflix").attributes
+    assert at["billing_cycle"] == "semiannual"
+    assert at["monthly_cost"] == 10.0 and at["yearly_cost"] == 120.0
+    assert hass.states.get(SUMMARY).state == "10.0"
+
+
+async def test_config_flow_accepts_semiannual(hass):
+    r = await hass.config_entries.flow.async_init(DOMAIN, context={"source": "user"})
+    r = await hass.config_entries.flow.async_configure(
+        r["flow_id"],
+        {"service": "netflix", "cost": 60.0, "currency": "EUR", "billing_cycle": "semiannual",
+         "renewal_date": _today().isoformat()},
+    )
+    assert r["type"] == FlowResultType.CREATE_ENTRY
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.netflix").attributes["monthly_cost"] == 10.0
+
+
+async def test_cost_is_my_share_keeps_the_entered_cost_as_per_person_amount(hass):
+    mine = _sub("spotify", "Spotify", cost=20.99, shared_count=6,
+                billing_cycle="semiannual", cost_is_my_share=True)
+    split = _sub("netflix", "Netflix", cost=20.0, shared_count=2)
+    await _setup(hass, mine, split)
+    a = hass.states.get("sensor.spotify").attributes
+    assert a["cost_is_my_share"] is True and a["cost_per_person"] == 20.99
+    assert a["monthly_cost"] == 3.5 and a["shared_count"] == 6
+    b = hass.states.get("sensor.netflix").attributes
+    assert b["cost_is_my_share"] is False and b["cost_per_person"] == 10.0
+    assert hass.states.get(SUMMARY).state == "23.5"  # totals count the entered cost
+
+
+async def test_options_flow_can_set_and_clear_cost_is_my_share(hass):
+    a = _sub("netflix", "Netflix")
+    await _setup(hass, a)
+    base = {"service": "netflix", "cost": 10.0, "currency": "EUR", "billing_cycle": "monthly",
+            "renewal_date": _today().isoformat(), "shared_count": 2}
+    for flag in (True, False):
+        r = await hass.config_entries.options.async_init(a.entry_id)
+        r = await hass.config_entries.options.async_configure(
+            r["flow_id"], {**base, "cost_is_my_share": flag}
+        )
+        assert r["type"] == FlowResultType.CREATE_ENTRY
+        await hass.async_block_till_done()
+        at = hass.states.get("sensor.netflix").attributes
+        assert at["cost_is_my_share"] is flag
+        assert at["cost_per_person"] == (10.0 if flag else 5.0)

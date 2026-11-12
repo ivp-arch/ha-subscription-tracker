@@ -38,6 +38,17 @@ def test_next_renewal_quarterly_yearly():
     assert next_renewal(None, "monthly", T) is None
 
 
+def test_next_renewal_semiannual():
+    assert next_renewal(date(2026, 1, 15), "semiannual", T) == date(2027, 1, 15)
+    # T is 2026-11-09: 2026-05-09 + 6 months lands exactly on T, one day earlier it rolls over
+    assert next_renewal(date(2026, 5, 9), "semiannual", T) == T
+    assert next_renewal(date(2026, 5, 8), "semiannual", T) == date(2027, 5, 8)
+    # day that does not exist in the target month: clamp, but restart from the anchor
+    assert next_renewal(date(2026, 8, 31), "semiannual", date(2027, 2, 1)) == date(2027, 2, 28)
+    assert next_renewal(date(2025, 8, 31), "semiannual", date(2027, 3, 1)) == date(2027, 8, 31)
+    assert next_renewal(date(2025, 8, 31), "semiannual", date(2027, 2, 1)) == date(2027, 2, 28)
+
+
 def test_status():
     assert subscription_status(True, 3, 7) == "paused"
     assert subscription_status(False, None, 7) == "active"
@@ -100,3 +111,4 @@ def test_summary_empty():
 
 def test_monthly_cost():
     assert monthly_cost(120, "yearly") == 10.0 and monthly_cost(30, "quarterly") == 10.0
+    assert monthly_cost(60, "semiannual") == 10.0 and monthly_cost(59.94, "semiannual") == 9.99

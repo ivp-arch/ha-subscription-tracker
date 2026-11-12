@@ -15,6 +15,7 @@
           "renewal_date": "Prossimo rinnovo",
           "subscribed_since": "Cliente dal (opzionale)",
           "shared_count": "Persone che condividono l'account",
+          "cost_is_my_share": "Il costo inserito è la mia quota (pago chi intesta l'abbonamento)",
           "payment_note": "Metodo di pagamento (nota, es. 'Carta personale')",
           "expiring_soon_days": "Giorni di preavviso per 'in scadenza'",
           "notes": "Note"
@@ -44,6 +45,7 @@
           "renewal_date": "Prossimo rinnovo",
           "subscribed_since": "Cliente dal (opzionale)",
           "shared_count": "Persone che condividono l'account",
+          "cost_is_my_share": "Il costo inserito è la mia quota (pago chi intesta l'abbonamento)",
           "payment_note": "Metodo di pagamento (nota, es. 'Carta personale')",
           "expiring_soon_days": "Giorni di preavviso per 'in scadenza'",
           "notes": "Note",

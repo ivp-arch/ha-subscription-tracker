@@ -15,6 +15,7 @@
           "renewal_date": "Next renewal",
           "subscribed_since": "Subscribed since (optional)",
           "shared_count": "People sharing the account",
+          "cost_is_my_share": "The cost I entered is my share (I pay whoever holds the subscription)",
           "payment_note": "Payment method (note, e.g. 'Personal card')",
           "expiring_soon_days": "Days of notice for 'expiring soon'",
           "notes": "Notes"
@@ -44,6 +45,7 @@
           "renewal_date": "Next renewal",
           "subscribed_since": "Subscribed since (optional)",
           "shared_count": "People sharing the account",
+          "cost_is_my_share": "The cost I entered is my share (I pay whoever holds the subscription)",
           "payment_note": "Payment method (note, e.g. 'Personal card')",
           "expiring_soon_days": "Days of notice for 'expiring soon'",
           "notes": "Notes",
