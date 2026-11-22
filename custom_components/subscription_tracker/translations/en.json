@@ -70,5 +70,11 @@
       "name": "Add price change",
       "description": "Manually add a past price change to the history."
     }
+  },
+  "issues": {
+    "legacy_card_resource": {
+      "title": "Subscription Tracker card installed twice",
+      "description": "Since version 0.5.0 the card ships with the integration and is registered as a dashboard resource automatically. The resource of the separately installed card is still present: `{url}`.\n\nUninstall \"Subscription Tracker Card\" from the Marketplace (or HACS) and, if the resource remains, delete it from Settings → Dashboards → menu (⋮) → Resources. Then reload the page clearing the browser cache. Your dashboards keep working with the same configuration. This notice goes away after the next restart."
+    }
   }
 }

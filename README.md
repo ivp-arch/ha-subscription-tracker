@@ -40,6 +40,82 @@ If you delete the "Subscription summary" entry while subscriptions still exist, 
 
 **Automatic renewal.** The renewal date you enter is an anchor: the sensor computes the next renewal by itself by adding whole cycles, without writing anything to the configuration. To stop the count use "paused".
 
+## Dashboard card
+
+The integration includes its own Lovelace card, `custom:subscription-tracker-card`: total recurring spend, change compared with the previous month, monthly budget, 30-day renewal timeline and the list of subscriptions. Tap a row to see the full detail with the price history.
+
+There is nothing to install or register: the integration serves the card itself (`/subscription_tracker/subscription-tracker-card.js`) and adds it to the dashboard resources when it starts, updating it with each new version. If you manage resources in YAML, the card is loaded as a frontend module instead. Add it from the card picker ("Subscription Tracker Card") or with the YAML below.
+
+By default the card inherits the Home Assistant theme, light or dark. The optional `orbit` preset has its own dark and light schemes and follows the Home Assistant mode.
+
+| Home Assistant theme, light | Home Assistant theme, dark |
+|---|---|
+| ![Subscription Tracker Card, Home Assistant theme, light](https://raw.githubusercontent.com/ivp-arch/ha-subscription-tracker/main/docs/screenshot-default-light.png) | ![Subscription Tracker Card, Home Assistant theme, dark](https://raw.githubusercontent.com/ivp-arch/ha-subscription-tracker/main/docs/screenshot-default-dark.png) |
+
+| Orbit preset, dark | Orbit preset, light |
+|---|---|
+| ![Subscription Tracker Card, Orbit preset, dark](https://raw.githubusercontent.com/ivp-arch/ha-subscription-tracker/main/docs/screenshot-orbit.png) | ![Subscription Tracker Card, Orbit preset, light](https://raw.githubusercontent.com/ivp-arch/ha-subscription-tracker/main/docs/screenshot-orbit-light.png) |
+
+*Rendered with sample data.*
+
+### Card configuration
+
+Minimal — the card finds all subscriptions by itself:
+
+```yaml
+type: custom:subscription-tracker-card
+```
+
+All options can be set from the visual editor (card menu → Edit, requires a recent Home Assistant frontend); the YAML below is the same configuration.
+
+Full:
+
+```yaml
+type: custom:subscription-tracker-card
+summary_entity: sensor.subscriptions_total
+theme: auto          # or orbit
+mode: auto           # orbit only: auto | dark | light
+show_paused: true
+show_tip: true
+show_timeline: true
+show_budget: true
+entities:
+  - sensor.netflix_premium
+  - sensor.dazn_standard
+  - sensor.spotify_family
+```
+
+| Option | Default | Description |
+|---|---|---|
+| `summary_entity` | `sensor.subscriptions_total` | Summary sensor of the integration |
+| `entities` | auto | Explicit list. If omitted or empty, the card detects the integration's sensors by itself |
+| `show_paused` | `true` | Show paused subscriptions at the bottom, dimmed |
+| `show_tip` | `true` | Show the contextual tip at the bottom of the card |
+| `show_timeline` | `true` | Show the renewals of the next 30 days (`upcoming` attribute of the summary) |
+| `show_budget` | `true` | Show the monthly budget ring, if a budget is set in the integration |
+| `theme` | `auto` | `auto` inherits the Home Assistant theme; `orbit` applies the Orbit style |
+| `mode` | `auto` | Only for `theme: orbit`. `auto` follows Home Assistant (light or dark); `dark` or `light` force the Orbit scheme |
+
+### Themes and customization
+
+All colors use `--stc-*` CSS variables: `--stc-bg` (card), `--stc-surface` (open row), `--stc-border`, `--stc-border-strong`, `--stc-track` (budget ring track), `--stc-text`, `--stc-muted`, `--stc-accent`, `--stc-ok`, `--stc-warn`, `--stc-danger`, `--stc-info`, `--stc-palette-1` … `--stc-palette-6` (one stable color per service), `--stc-radius`, `--stc-row-radius`, `--stc-font`, `--stc-font-display`, `--stc-font-mono`. When not set they inherit the Home Assistant theme; you can redefine them from a theme or with card-mod. The `orbit` preset has a dark and a light scheme (the light one is used when Home Assistant is in light mode, or with `mode: light`); the `--stc-*` variables you define override both. The `orbit` preset loads no external fonts: it uses Space Grotesk, Inter and JetBrains Mono only if they are already installed, otherwise system fonts.
+
+Icons are generic per category (video, audio, other, paused), not brand logos. If you set a custom `mdi:` icon on a subscription in the integration's options, the card shows that icon instead.
+
+### Contextual tip
+
+The box at the bottom is an observation, not a data point, chosen in priority order:
+
+1. Two or more renewals within the same week → shows the total that will go out in those days
+2. A paused subscription → suggests considering cancelling it
+3. A service that rose by more than 20 % since you became a customer → reports the change
+
+If none of the conditions applies, the box is not shown.
+
+Sorting is by urgency: subscriptions with fewer days to renewal come first, paused ones always last.
+
+The card text and number/date formatting are currently in Italian (`it-IT`).
+
 ## Price history
 
 It works in two combined ways:
@@ -62,11 +138,15 @@ data:
 2. Enter `ivp-arch/ha-subscription-tracker`
 3. Install "Subscription Tracker" and restart Home Assistant
 
+The dashboard card is included (Home Assistant 2025.2 or later).
+
+**Upgrading from 0.4.x with the separate card.** Up to 0.4.x the card was a separate download (`ivp-arch/ha-subscription-tracker-card`). After updating to 0.5.0, uninstall "Subscription Tracker Card" from the Marketplace (or HACS) and, if it remains, delete its resource from Settings → Dashboards → menu (⋮) → Resources, then reload the page clearing the browser cache (the old card may still be cached). Your dashboards keep working with the same card configuration. Until then the integration shows a notice in Settings → Repairs.
+
 ### HACS (Home Assistant before 2026.11)
 HACS → Integrations → menu (⋮) → Custom repositories → add this repo's URL, category "Integration".
 
 ### Manual
-Copy `custom_components/subscription_tracker` into the `custom_components` folder of your instance, then restart.
+Copy `custom_components/subscription_tracker` (including its `www` folder) into the `custom_components` folder of your instance, then restart.
 
 ## Configuration
 
@@ -134,8 +214,6 @@ pytest
 
 - Selector option labels translated in the configuration UI
 - Ready-to-use automation blueprints
-
-The companion Lovelace card (budget, timeline, "Orbit" theme) lives in the [card repository](https://github.com/ivp-arch/ha-subscription-tracker-card).
 
 ## Note
 

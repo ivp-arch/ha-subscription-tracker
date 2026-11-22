@@ -34,7 +34,7 @@ the rest is specific to this project.
 
 ## Project
 
-Home Assistant custom integration `subscription_tracker`: streaming subscriptions with renewals, monthly and annual totals, budget, 30-day timeline and monthly history. Distributed through the Home Assistant Marketplace (ex HACS, same `hacs.json`). The Lovelace card lives in a separate repo (`ha-subscription-tracker-card`).
+Home Assistant custom integration `subscription_tracker`: streaming subscriptions with renewals, monthly and annual totals, budget, 30-day timeline and monthly history. Distributed through the Home Assistant Marketplace (ex HACS, same `hacs.json`). The Lovelace card ships with the integration (`custom_components/subscription_tracker/www/`, since 0.5.0, as required by the HACS review): `frontend.py` serves it at `/subscription_tracker/subscription-tracker-card.js` and keeps one dashboard resource with `?v=<version>` (YAML resources: extra frontend module). The old card repo is archived. `CARD_VERSION` in the JS equals the manifest version (tested).
 
 ### Architecture
 

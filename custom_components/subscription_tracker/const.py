@@ -39,6 +39,12 @@ UPCOMING_DAYS = 30
 # Internal signal: recompute the summary.
 SIGNAL_SUMMARY_UPDATE = f"{DOMAIN}_summary_update"
 
+# Bundled Lovelace card (www/), served by the integration and registered as a
+# dashboard resource.
+CARD_FILENAME = "subscription-tracker-card.js"
+CARD_URL_PATH = f"/{DOMAIN}/{CARD_FILENAME}"
+ISSUE_LEGACY_CARD = "legacy_card_resource"
+
 # Monthly totals of the summary, kept in their own file under .storage
 HISTORY_STORE_KEY = f"{DOMAIN}.monthly_history"
 HISTORY_STORE_VERSION = 1

@@ -25,6 +25,11 @@ from .const import (
     SERVICE_ADD_PRICE_HISTORY,
     SIGNAL_SUMMARY_UPDATE,
 )
+from .frontend import (
+    async_register_card_path,
+    async_remove_card_resource,
+    async_setup_card_resource,
+)
 
 PLATFORMS = ["sensor"]
 
@@ -82,6 +87,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     """Register the service and make sure the hub entry exists."""
     _async_register_services(hass)
     _async_sync_unique_ids(hass)
+    await async_register_card_path(hass)
 
     # The hub entry owns the summary and the budget: it is created automatically
     # the first time (also for users upgrading from a version without a hub).
@@ -93,6 +99,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if not entry.data.get(CONF_HUB):
         # The hub may have been deleted while no subscription existed.
         _async_ensure_hub(hass)
+    else:
+        # One hub per installation: the card resource is kept in sync from here.
+        await async_setup_card_resource(hass)
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
@@ -104,6 +113,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     """Keep the summary consistent after an entry is removed."""
+    if not hass.config_entries.async_entries(DOMAIN):
+        # Integration removed: drop the card resource with it.
+        await async_remove_card_resource(hass)
     if entry.data.get(CONF_HUB):
         # The hub owns the summary sensor and the budget: without it the summary
         # would be missing until the next restart. While subscriptions remain, bring

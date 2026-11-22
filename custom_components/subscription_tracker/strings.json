@@ -70,5 +70,11 @@
       "name": "Aggiungi variazione di prezzo",
       "description": "Inserisce manualmente una variazione di prezzo passata nello storico."
     }
+  },
+  "issues": {
+    "legacy_card_resource": {
+      "title": "Card Subscription Tracker installata due volte",
+      "description": "Dalla versione 0.5.0 la card è inclusa nell'integrazione e viene registrata da sola come risorsa della plancia. È ancora presente la risorsa della card installata a parte: `{url}`.\n\nDisinstalla \"Subscription Tracker Card\" dal Marketplace (o da HACS) e, se la risorsa resta, eliminala da Impostazioni → Plance → menu (⋮) → Risorse. Poi ricarica la pagina svuotando la cache del browser. Le plance continuano a funzionare con la stessa configurazione. L'avviso sparisce al riavvio successivo."
+    }
   }
 }
